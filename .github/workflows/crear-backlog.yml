@@ -1,0 +1,85 @@
+name: Crear Product Backlog
+
+# Crea las etiquetas, los sprints (milestones) y las historias de usuario (issues)
+# a partir de .github/backlog.json. Se ejecuta al modificar backlog.json o manualmente desde Actions.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/backlog.json', '.github/workflows/crear-backlog.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  backlog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generar backlog y plan de sprints en Markdown
+        run: |
+          python3 .github/scripts/generar_docs.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add planeacion/05-product-backlog.md planeacion/06-plan-de-sprints.md
+          git diff --cached --quiet || (git commit -m "Genera Product Backlog y plan de sprints desde backlog.json" && git push)
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('.github/backlog.json', 'utf8'));
+            const { owner, repo } = context.repo;
+
+            // 1. Etiquetas
+            const labels = [
+              { name: 'historia de usuario', color: '1D76DB', description: 'Historia del Product Backlog' },
+              { name: 'prioridad: alta', color: 'D93F0B', description: 'Must' },
+              { name: 'prioridad: media', color: 'FBCA04', description: 'Should' },
+              { name: 'prioridad: baja', color: 'C5DEF5', description: 'Could' },
+              ...[1, 2, 3, 5, 8].map(p => ({ name: `pts: ${p}`, color: 'BFD4F2', description: `${p} puntos de historia` })),
+              ...data.epicas.map(e => ({ name: `${e.id} ${e.nombre}`, color: '5319E7', description: 'Épica' })),
+              ...['David', 'Isaac', 'Uziel', 'Stephanie', 'Antonio'].map(n => ({ name: `resp: ${n}`, color: '0E8A16', description: 'Responsable' })),
+            ];
+            for (const l of labels) {
+              try { await github.rest.issues.createLabel({ owner, repo, ...l }); }
+              catch (e) { if (e.status !== 422) throw e; }
+            }
+
+            // 2. Sprints como milestones
+            const existing = await github.paginate(github.rest.issues.listMilestones, { owner, repo, state: 'all' });
+            const ms = {};
+            for (const [i, s] of data.sprints.entries()) {
+              let m = existing.find(x => x.title === s.titulo);
+              if (!m) {
+                m = (await github.rest.issues.createMilestone({
+                  owner, repo, title: s.titulo,
+                  description: `Objetivo del sprint: ${s.objetivo}\nDel ${s.inicio} al ${s.fin}.`,
+                  due_on: `${s.fin}T23:59:00Z`,
+                })).data;
+              }
+              ms[i + 1] = m.number;
+            }
+
+            // 3. Historias de usuario como issues (en orden de prioridad del backlog)
+            const issues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: 'all' });
+            const epica = id => data.epicas.find(e => e.id === id);
+            for (const h of data.historias) {
+              const title = `${h.id} · ${h.titulo}`;
+              if (issues.some(i => i.title === title)) continue;
+              const s = data.sprints[h.sprint - 1];
+              const body = [
+                `**Historia de usuario**`, '', h.historia, '',
+                `**Criterios de aceptación**`, '',
+                ...h.criterios.map(c => `- [ ] ${c}`), '',
+                `| Épica | Puntos | Prioridad | Sprint | Responsable |`,
+                `|---|---|---|---|---|`,
+                `| ${h.epica} ${epica(h.epica).nombre} | ${h.puntos} | ${h.prioridad} | ${s.titulo} | ${h.responsable} |`,
+              ].join('\n');
+              await github.rest.issues.create({
+                owner, repo, title, body, milestone: ms[h.sprint],
+                labels: ['historia de usuario', `prioridad: ${h.prioridad.toLowerCase()}`, `pts: ${h.puntos}`,
+                         `${h.epica} ${epica(h.epica).nombre}`, `resp: ${h.responsable}`],
+              });
+            }
+            core.summary.addRaw(`Backlog creado: ${data.historias.length} historias en ${data.sprints.length} sprints.`).write();
