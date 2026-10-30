@@ -1,0 +1,1017 @@
+name: Instalar archivos del proyecto
+
+# Escribe en el repositorio los documentos de planeación, el prototipo y los datos del backlog.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/instalar-proyecto.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  instalar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Escribir archivos
+        run: |
+          mkdir -p planeacion docs .github/scripts
+          touch docs/.nojekyll
+          cat > 'README.md' <<'FIN_0'
+          # Gestión de Eventos GCS
+
+          Aplicación de gestión de eventos para **Global Consulting Services (GCS)**: creación de eventos, registro y seguimiento de asistentes, asignación de tareas del equipo, notificaciones a los asistentes y calendario de eventos.
+
+          Proyecto final de **Metodologías ágiles** · Universidad Tecmilenio · **Equipo 1**
+          Con autorización del profesor, se usa **GitHub** en lugar de Siemens Mendix.
+
+          | Rol Scrum | Integrante |
+          |---|---|
+          | Product Owner | Antonio Anaya |
+          | Scrum Master | Stephanie Ramos Lozano |
+          | Development Team | David Alfonso Lorenzo · Calixto Isaac Galeana Medrano · Uziel García |
+
+          ## Fase 1 · Conceptualización y planificación (avance)
+
+          | # | Entregable | Dónde está |
+          |---|---|---|
+          | 1 | Objetivos y funcionalidades clave | [planeacion/01-objetivos-y-funcionalidades.md](planeacion/01-objetivos-y-funcionalidades.md) |
+          | 2 | Modelo de datos y diagrama entidad-relación | [planeacion/02-modelo-de-datos.md](planeacion/02-modelo-de-datos.md) |
+          | 3 | Arquitectura y justificación de herramientas | [planeacion/03-arquitectura.md](planeacion/03-arquitectura.md) |
+          | 4 | Flujos de trabajo (BPMN): crear evento, asistentes y tareas | [planeacion/04-flujos-de-trabajo.md](planeacion/04-flujos-de-trabajo.md) |
+          | 5 | Product Backlog con estimación (Planning Poker) | [planeacion/05-product-backlog.md](planeacion/05-product-backlog.md) y [Issues](../../issues) |
+          | 6 | Plan de sprints | [planeacion/06-plan-de-sprints.md](planeacion/06-plan-de-sprints.md) y [Milestones](../../milestones) |
+          | 7 | Plan de recursos, dependencias y cronograma | [planeacion/07-plan-de-recursos-y-cronograma.md](planeacion/07-plan-de-recursos-y-cronograma.md) |
+          | 8 | Wireframes (prototipo navegable) | [Abrir prototipo](https://tonyanaya2009-cloud.github.io/gcs-gestion-eventos/) · código en [docs/index.html](docs/index.html) |
+          | 9 | Seguimiento del equipo | GitHub Projects: **Gestión de Eventos GCS · Scrum** |
+
+          ## Resumen del plan
+
+          - **21 historias de usuario · 81 puntos · 6 épicas**
+          - **4 sprints de 1 semana** (2 al 29 de noviembre de 2026), unos 20 puntos por sprint
+
+          | Sprint | Objetivo | Puntos |
+          |---|---|---|
+          | 1 · Base y eventos | Iniciar sesión, crear y consultar eventos, registro de asistentes | 21 |
+          | 2 · Asistentes y tareas | Cupo, lista de espera, check-in y tablero de tareas | 21 |
+          | 3 · Comunicación y notificaciones | Confirmaciones, avisos de cambio, recordatorios y mensajes | 19 |
+          | 4 · Calendario y seguimiento | Calendario, panel del evento, historial y exportación | 20 |
+
+          ## Cómo se usa GitHub en el proyecto
+
+          - **Issues:** cada historia de usuario, con criterios de aceptación, puntos, prioridad, épica y responsable (etiquetas).
+          - **Milestones:** cada sprint, con su objetivo, fechas y progreso.
+          - **Projects:** tablero Scrum (Product Backlog → Sprint Backlog → En curso → En revisión → Terminado), vista del plan por sprint y cronograma.
+          - **Actions:** el flujo [Crear Product Backlog](.github/workflows/crear-backlog.yml) genera etiquetas, sprints e historias a partir de [backlog.json](.github/backlog.json). En la fase 2 también correrá pruebas y despliegue.
+          - **Pages:** publica el prototipo navegable y, en la fase 2, la aplicación.
+          FIN_0
+          cat > 'planeacion/01-objetivos-y-funcionalidades.md' <<'FIN_1'
+          # 1. Objetivos y funcionalidades clave
+
+          ## Problema
+          Global Consulting Services (GCS) organiza conferencias, capacitaciones, webinars y reuniones ejecutivas para sus clientes en distintas regiones del mundo. Hoy lo hace con hojas de cálculo y correos, lo que provoca errores de planificación, registros duplicados o perdidos, tareas sin responsable claro y asistentes que no se enteran de los cambios.
+
+          ## Objetivo general
+          Diseñar, desarrollar y desplegar con Scrum una aplicación web de gestión de eventos que centralice la creación de eventos, el registro de asistentes, la asignación de tareas y la comunicación con los participantes, para reducir errores y tiempos de organización en GCS.
+
+          ## Objetivos específicos
+          | # | Objetivo | Indicador de éxito |
+          |---|---|---|
+          | O1 | Centralizar la creación y gestión de eventos en una sola aplicación. | 100% de los eventos se crean en la app; ninguno en hojas de cálculo. |
+          | O2 | Automatizar el registro y seguimiento de asistentes, con control de cupo y lista de espera. | Cero registros duplicados y cero eventos con sobrecupo. |
+          | O3 | Asignar y dar seguimiento a las tareas del equipo organizador por evento. | Toda tarea tiene responsable y fecha límite; las vencidas se ven en el tablero. |
+          | O4 | Comunicar automáticamente a los asistentes confirmaciones, cambios y recordatorios. | Confirmación en menos de 1 minuto; recordatorio 24 h antes en el 100% de los eventos publicados. |
+          | O5 | Visualizar en un calendario todos los eventos programados en las distintas regiones. | Calendario mensual y semanal con filtros por región y tipo. |
+          | O6 | Entregar la aplicación en 4 sprints de 1 semana usando Scrum. | 81 puntos de historia completados al 29 de noviembre de 2026. |
+
+          ## Funcionalidades clave
+          | Funcionalidad | Qué incluye | Épica | Historias |
+          |---|---|---|---|
+          | **Creación y gestión de eventos** | Crear, editar, publicar y cancelar eventos; tipo, modalidad, sede o enlace, cliente, cupo y zona horaria; lista con filtros; panel de seguimiento. | E1 | HU-02, 03, 04, 18 |
+          | **Registro y seguimiento de asistentes** | Formulario de registro, control de cupo y lista de espera, búsqueda de asistentes, check-in y exportación a CSV. | E2 | HU-05, 06, 07, 08, 20 |
+          | **Asignación y seguimiento de tareas** | Tareas por evento con responsable, prioridad y fecha límite; tablero Pendiente / En curso / Hecha; vista "Mis tareas". | E3 | HU-09, 10, 11 |
+          | **Comunicación y notificaciones** | Confirmación de registro, aviso de cambios y cancelaciones, recordatorio 24 h antes, mensajes masivos e historial de envíos. | E4 | HU-12, 13, 14, 15, 19 |
+          | **Calendario de eventos** | Vistas mes y semana, colores por tipo, filtros por región y tipo, acceso al detalle. | E5 | HU-16, 17 |
+          | **Acceso y administración** | Inicio de sesión por rol y administración de usuarios. | E6 | HU-01, 21 |
+
+          ## Usuarios de la aplicación
+          - **Administrador:** gestiona usuarios y tiene acceso total.
+          - **Organizador:** crea eventos, gestiona asistentes, asigna tareas y envía comunicaciones.
+          - **Miembro del equipo:** consulta y actualiza sus tareas.
+          - **Asistente (externo):** se registra a eventos y recibe notificaciones; no necesita cuenta.
+
+          ## Requisitos no funcionales
+          - **Usabilidad:** interfaz en español, navegación con menú lateral fijo y máximo 3 clics para llegar a cualquier pantalla.
+          - **Seguridad:** acceso por rol, contraseñas cifradas, conexión HTTPS y datos de asistentes visibles solo para el equipo.
+          - **Rendimiento:** listas y calendario cargan en menos de 2 segundos con hasta 1,000 eventos.
+          - **Internacionalización:** fechas guardadas en UTC y mostradas en la zona horaria del evento o del usuario.
+          - **Escalabilidad y mantenimiento:** módulos independientes y despliegue automático con GitHub Actions.
+          FIN_1
+          cat > 'planeacion/02-modelo-de-datos.md' <<'FIN_2'
+          # 2. Modelo de datos
+
+          El modelo soporta las cinco funcionalidades clave: eventos, asistentes, tareas, notificaciones y calendario. El calendario no necesita una entidad propia: es una vista de EVENTO por fecha, tipo y región.
+
+          ## Diagrama entidad-relación (ERD)
+
+          ~~~mermaid
+          erDiagram
+              CLIENTE ||--o{ EVENTO : "contrata"
+              SEDE |o--o{ EVENTO : "aloja"
+              USUARIO ||--o{ EVENTO : "organiza"
+              EVENTO ||--o{ REGISTRO : "recibe"
+              ASISTENTE ||--o{ REGISTRO : "realiza"
+              EVENTO ||--o{ TAREA : "requiere"
+              USUARIO ||--o{ TAREA : "es responsable de"
+              EVENTO ||--o{ NOTIFICACION : "genera"
+              NOTIFICACION ||--|{ DESTINATARIO : "se envía a"
+              ASISTENTE |o--o{ DESTINATARIO : "recibe"
+              USUARIO |o--o{ DESTINATARIO : "recibe"
+
+              USUARIO {
+                  int id PK
+                  string nombre
+                  string correo UK
+                  string rol "Administrador | Organizador | Miembro"
+                  string region
+                  bool activo
+              }
+              CLIENTE {
+                  int id PK
+                  string empresa
+                  string contacto
+                  string correo
+                  string pais
+              }
+              SEDE {
+                  int id PK
+                  string nombre
+                  string direccion
+                  string ciudad
+                  string pais
+                  string region
+                  int capacidad
+              }
+              EVENTO {
+                  int id PK
+                  string nombre
+                  string tipo "Conferencia | Capacitación | Webinar | Reunión ejecutiva"
+                  string descripcion
+                  datetime fecha_inicio
+                  datetime fecha_fin
+                  string zona_horaria
+                  string modalidad "Presencial | Virtual | Híbrido"
+                  string enlace_virtual
+                  int cupo_maximo
+                  bool solo_invitacion
+                  string estado "Borrador | Publicado | Cancelado | Finalizado"
+                  int cliente_id FK
+                  int sede_id FK
+                  int organizador_id FK
+              }
+              ASISTENTE {
+                  int id PK
+                  string nombre
+                  string apellidos
+                  string correo UK
+                  string empresa
+                  string cargo
+                  string telefono
+                  string pais
+              }
+              REGISTRO {
+                  int id PK
+                  int evento_id FK
+                  int asistente_id FK
+                  datetime fecha_registro
+                  string estado "Confirmado | En espera | Cancelado"
+                  int posicion_espera
+                  bool asistio
+                  datetime fecha_checkin
+              }
+              TAREA {
+                  int id PK
+                  int evento_id FK
+                  int responsable_id FK
+                  string titulo
+                  string descripcion
+                  string prioridad "Alta | Media | Baja"
+                  string estado "Pendiente | En curso | Hecha"
+                  date fecha_limite
+              }
+              NOTIFICACION {
+                  int id PK
+                  int evento_id FK
+                  string tipo "Confirmación | Cambio | Recordatorio | Cancelación | Mensaje | Tarea"
+                  string asunto
+                  string mensaje
+                  string canal "Correo | App"
+                  datetime fecha_programada
+                  datetime fecha_envio
+                  string estado "Programada | Enviada | Fallida"
+              }
+              DESTINATARIO {
+                  int id PK
+                  int notificacion_id FK
+                  int asistente_id FK "nulo si es usuario"
+                  int usuario_id FK "nulo si es asistente"
+                  string estado_entrega "Pendiente | Entregado | Rebotado"
+                  datetime fecha_lectura
+              }
+          ~~~
+
+          ## Entidades y relaciones
+
+          | Entidad | Para qué sirve | Relaciones clave |
+          |---|---|---|
+          | **USUARIO** | Miembros de GCS que usan la aplicación (administradores, organizadores y miembros del equipo). | Organiza eventos (1:N), es responsable de tareas (1:N) y recibe avisos de tareas (1:N con DESTINATARIO). |
+          | **CLIENTE** | Empresa para la que GCS organiza el evento. | Un cliente contrata muchos eventos (1:N). |
+          | **SEDE** | Lugar físico del evento. Los webinars no tienen sede y usan enlace_virtual. | Una sede aloja muchos eventos; un evento tiene 0 o 1 sede. |
+          | **EVENTO** | Entidad central: conferencias, capacitaciones, webinars y reuniones ejecutivas en distintas regiones. | Recibe registros, requiere tareas y genera notificaciones (todas 1:N). |
+          | **ASISTENTE** | Persona externa que participa en uno o más eventos. | Relación N:M con EVENTO a través de REGISTRO. |
+          | **REGISTRO** | Entidad intermedia Evento–Asistente. Guarda el estado (confirmado o en espera), la posición en la lista de espera y el check-in. | Pertenece a un evento y a un asistente; el par (evento, asistente) es único. |
+          | **TAREA** | Trabajo interno del equipo para preparar un evento. | Pertenece a un evento y tiene un responsable (USUARIO). |
+          | **NOTIFICACION** | Mensaje enviado o programado: confirmación, cambio, recordatorio, cancelación, mensaje masivo o aviso de tarea. | Pertenece a un evento y se envía a muchos destinatarios. |
+          | **DESTINATARIO** | Entidad intermedia Notificación–Persona. Guarda el estado de entrega de cada envío. | Apunta a un ASISTENTE o a un USUARIO (uno de los dos). |
+
+          ### Reglas del modelo
+          - **Cupo:** si los REGISTROS confirmados alcanzan cupo_maximo, los nuevos registros quedan En espera con su posicion_espera.
+          - **Unicidad:** un asistente no puede registrarse dos veces al mismo evento (evento_id + asistente_id únicos).
+          - **Fechas:** fecha_fin ≥ fecha_inicio, y las fechas se guardan en UTC con la zona_horaria del evento para mostrarlas correctamente en cada región.
+          - **Borrado lógico:** los eventos cancelados y los usuarios desactivados no se borran, para conservar el historial.
+          FIN_2
+          cat > 'planeacion/03-arquitectura.md' <<'FIN_3'
+          # 3. Arquitectura de la aplicación
+
+          Con autorización del profesor, el proyecto usa **GitHub** en lugar de Siemens Mendix. Para mantener la idea de Mendix de desarrollar rápido y sin servidores propios, la aplicación se plantea como una **aplicación web por capas, sin servidor**, con servicios gratuitos o de bajo costo.
+
+          ## Vista general
+
+          ~~~mermaid
+          flowchart LR
+              subgraph U["Usuarios"]
+                  ORG["Organizador / Miembro<br/>(navegador)"]
+                  ASI["Asistente<br/>(navegador o correo)"]
+              end
+
+              subgraph FE["Capa de presentación · GitHub Pages"]
+                  UI["Aplicación web (HTML, CSS, JS)<br/>Eventos · Asistentes · Tareas<br/>Calendario · Notificaciones · Usuarios"]
+                  REG["Formulario público<br/>de registro"]
+              end
+
+              subgraph BE["Capa de lógica · Cloudflare Workers (API REST)"]
+                  AUTH["Autenticación y roles (JWT)"]
+                  API["Servicios: eventos, registros,<br/>tareas, notificaciones, calendario"]
+                  CRON["Tareas programadas (Cron)<br/>recordatorios 24 h · tareas vencidas"]
+              end
+
+              subgraph DATA["Capa de datos"]
+                  DB[("Cloudflare D1 (SQL)<br/>tablas del modelo ER")]
+              end
+
+              MAIL["Servicio de correo<br/>transaccional"]
+              GH["GitHub<br/>repositorio · Projects · Actions (CI/CD)"]
+
+              ORG --> UI
+              ASI --> REG
+              UI -->|HTTPS + JSON| AUTH
+              REG -->|HTTPS + JSON| API
+              AUTH --> API
+              API --> DB
+              CRON --> DB
+              API --> MAIL
+              CRON --> MAIL
+              MAIL -->|confirmaciones, cambios,<br/>recordatorios| ASI
+              GH -.->|despliegue automático| FE
+              GH -.->|despliegue automático| BE
+          ~~~
+
+          ## Capas y componentes
+
+          | Capa | Componente | Responsabilidad |
+          |---|---|---|
+          | Presentación | Aplicación web en GitHub Pages | Pantallas del organizador y del equipo: inicio, eventos, detalle del evento, asistentes, tareas, calendario y notificaciones. |
+          | Presentación | Formulario público de registro | Página que el asistente abre desde la invitación para registrarse, sin cuenta. |
+          | Lógica | API REST en Cloudflare Workers | Reglas de negocio: validaciones, control de cupo y lista de espera, cambio de estado de tareas, creación de notificaciones. |
+          | Lógica | Autenticación (JWT) | Inicio de sesión y permisos por rol (administrador, organizador, miembro). |
+          | Lógica | Tareas programadas (Cron Triggers) | Enviar recordatorios 24 h antes, marcar tareas vencidas y reintentar envíos fallidos. |
+          | Datos | Cloudflare D1 (SQL) | Tablas del modelo entidad-relación con llaves foráneas e índices por evento, fecha y correo. |
+          | Integración | Servicio de correo transaccional | Envío de los correos a asistentes y miembros del equipo. |
+          | Operación | GitHub Actions | Pruebas y despliegue automático en cada cambio a la rama principal. |
+
+          ## Módulos (organización del código)
+
+          ~~~text
+          /frontend
+            /eventos        lista, formulario, detalle y panel del evento
+            /asistentes     registro público, lista, check-in, exportación CSV
+            /tareas         tablero por evento y "Mis tareas"
+            /calendario     vistas mes / semana
+            /notificaciones historial y envío de mensajes
+            /usuarios       inicio de sesión y administración
+          /api
+            /routes         un archivo por módulo (eventos, registros, tareas, notificaciones, usuarios)
+            /services       reglas de negocio (cupo, lista de espera, recordatorios)
+            /db             esquema SQL y migraciones
+            /jobs           tareas programadas
+          /tests            pruebas automáticas que corren en GitHub Actions
+          ~~~
+
+          ## Estructura de la base de datos
+          Las tablas siguen el [modelo de datos](02-modelo-de-datos.md): usuario, cliente, sede, evento, asistente, registro, tarea, notificacion y destinatario.
+          - **Índices:** evento(fecha_inicio, region), registro(evento_id, estado), tarea(responsable_id, fecha_limite) y asistente(correo) único.
+          - **Integridad:** llaves foráneas en todas las relaciones y restricción única registro(evento_id, asistente_id).
+
+          ## Buenas prácticas y escalabilidad
+          - **Separación por capas:** la interfaz no accede a la base de datos; todo pasa por la API.
+          - **Módulos independientes:** cada funcionalidad clave tiene su módulo de interfaz y sus rutas en la API, así se pueden repartir entre el equipo y crecer sin afectar a los demás.
+          - **Sin servidor:** Workers y D1 escalan automáticamente con la demanda de eventos en distintas regiones.
+          - **Fechas en UTC:** se guardan en UTC y se muestran en la zona horaria del evento o del usuario.
+          - **Seguridad:** HTTPS, contraseñas con hash, tokens con expiración y validación de datos en la API.
+          - **Integración y despliegue continuos:** cada *pull request* corre pruebas en GitHub Actions antes de unirse a la rama principal.
+
+          ## Herramientas y justificación
+
+          | Herramienta | Uso en el proyecto | Por qué se eligió |
+          |---|---|---|
+          | **GitHub (repositorio)** | Código, documentación, diagramas y control de versiones | Sustituye a Mendix (autorizado); el equipo trabaja en paralelo con ramas y *pull requests*. |
+          | **GitHub Projects** | Product Backlog, plan de sprints, tablero y cronograma | Equivale a las herramientas de seguimiento de la plataforma online de Mendix (Epics) y se integra con los issues. |
+          | **GitHub Issues y Milestones** | Historias de usuario y sprints | Cada historia tiene criterios de aceptación, puntos, responsable y sprint. |
+          | **GitHub Actions** | Creación del backlog, pruebas y despliegue | Automatiza tareas repetitivas, como el despliegue en un clic que ofrece Mendix. |
+          | **GitHub Pages** | Prototipo navegable y, en la fase 2, la aplicación web | Hospedaje gratuito, accesible para el profesor y los usuarios. |
+          | **Prototipo HTML (wireframes)** | Diseño de las pantallas principales | Cumple el papel de Figma o Adobe XD y además se puede navegar con clics. |
+          | **Mermaid** | ERD, arquitectura, flujos y cronograma | GitHub lo muestra como diagrama y se versiona junto con el código. |
+          | **Cloudflare Workers y D1** | API y base de datos (fase 2) | Plan gratuito, sin administrar servidores, con SQL y escalado automático. |
+          FIN_3
+          cat > 'planeacion/04-flujos-de-trabajo.md' <<'FIN_4'
+          # 4. Flujos de trabajo (estilo BPMN)
+
+          Cada diagrama tiene carriles por participante (Organizador, Sistema, Asistente o Miembro del equipo). Notación: círculo = inicio, doble círculo = fin, rombo = decisión, rectángulo = actividad.
+
+          ## 4.1 Creación de un evento
+
+          ~~~mermaid
+          flowchart TB
+              subgraph L1["Organizador"]
+                  A((Inicio)) --> B["Abre 'Nuevo evento'"]
+                  B --> C["Captura nombre, tipo, fechas,<br/>zona horaria, modalidad, cliente y cupo"]
+                  C --> D{"¿Modalidad?"}
+                  D -->|Presencial / Híbrido| E["Selecciona sede"]
+                  D -->|Virtual| F["Captura enlace del webinar"]
+                  E --> G["Guarda como borrador"]
+                  F --> G
+                  J["Revisa el evento"] --> K{"¿Publicar?"}
+                  K -->|No| L["Sigue editando"] --> J
+                  K -->|Sí| M["Publica el evento"]
+              end
+              subgraph L2["Sistema"]
+                  G --> H{"¿Datos válidos?<br/>fin ≥ inicio, cupo > 0,<br/>sede o enlace"}
+                  H -->|No| I["Muestra errores"] --> C
+                  H -->|Sí| H2["Guarda evento en estado Borrador"] --> J
+                  M --> N["Cambia estado a Publicado"]
+                  N --> O["Habilita formulario de registro<br/>y lo muestra en el calendario"]
+                  O --> P["Programa recordatorio 24 h antes"]
+                  P --> Q(((Fin)))
+              end
+          ~~~
+
+          ## 4.2 Registro y seguimiento de asistentes
+
+          ~~~mermaid
+          flowchart TB
+              subgraph L1["Asistente"]
+                  A((Inicio)) --> B["Abre la invitación y el<br/>formulario de registro"]
+                  B --> C["Captura nombre, correo,<br/>empresa, cargo y país"]
+                  R1["Recibe correo de confirmación"]
+                  R2["Recibe correo: en lista de espera"]
+                  R3["Recibe recordatorio 24 h antes"]
+              end
+              subgraph L2["Sistema"]
+                  C --> D{"¿Evento publicado<br/>y correo no registrado?"}
+                  D -->|No| E["Muestra aviso"] --> X(((Fin)))
+                  D -->|Sí| F{"¿Hay cupo?"}
+                  F -->|Sí| G["Crea registro Confirmado"] --> R1
+                  F -->|No| H["Crea registro En espera"] --> R2
+                  S1["Si un confirmado cancela,<br/>promueve al primero en espera"]
+                  T1["Envía recordatorio a confirmados"] --> R3
+              end
+              subgraph L3["Organizador"]
+                  R1 --> I["Consulta lista de asistentes<br/>y totales por estado"]
+                  R2 --> I
+                  I --> J{"¿Cambios manuales?"}
+                  J -->|Cancelar registro| S1
+                  J -->|No| K["Día del evento:<br/>registra check-in"]
+                  S1 --> K
+                  K --> T1
+                  R3 --> L["Revisa asistencia y exporta CSV"]
+                  L --> Z(((Fin)))
+              end
+          ~~~
+
+          ## 4.3 Asignación y gestión de tareas
+
+          ~~~mermaid
+          flowchart TB
+              subgraph L1["Organizador"]
+                  A((Inicio)) --> B["Abre el tablero de tareas<br/>del evento"]
+                  B --> C["Crea tarea: título, responsable,<br/>prioridad y fecha límite"]
+                  M["Revisa avance en el panel<br/>del evento"] --> N{"¿Todas las tareas<br/>hechas?"}
+                  N -->|No| O["Reasigna o ajusta fechas"] --> M
+                  N -->|Sí| Z(((Fin)))
+              end
+              subgraph L2["Sistema"]
+                  C --> D{"¿Campos obligatorios<br/>completos?"}
+                  D -->|No| E["Muestra errores"] --> C
+                  D -->|Sí| F["Guarda tarea en Pendiente"]
+                  F --> G["Notifica al responsable"]
+                  J["Actualiza tablero y<br/>panel del evento"] --> M
+                  V["Revisión diaria:<br/>marca tareas vencidas y avisa"] --> J
+              end
+              subgraph L3["Miembro del equipo"]
+                  G --> H["Ve la tarea en 'Mis tareas'"]
+                  H --> I["Mueve a En curso"]
+                  I --> K["Termina y mueve a Hecha"]
+                  I -.->|si no avanza| V
+                  K --> J
+              end
+          ~~~
+          FIN_4
+          cat > 'planeacion/07-plan-de-recursos-y-cronograma.md' <<'FIN_5'
+          # 7. Plan de recursos y cronograma
+
+          ## 7.1 Recursos
+
+          **Personal (Equipo 1)**
+          | Integrante | Rol | Dedicación | Responsabilidad principal |
+          |---|---|---|---|
+          | Antonio Anaya | Product Owner | 6 h/semana | Visión del producto, prioridad del backlog, criterios de aceptación y aceptación de historias. |
+          | Stephanie Ramos Lozano | Scrum Master | 8 h/semana | Facilita los eventos Scrum, elimina impedimentos, mantiene el tablero y apoya con historias de administración y comunicación. |
+          | David Alfonso Lorenzo | Desarrollador backend y datos | 10 h/semana | Base de datos, API, autenticación, reglas de cupo, tareas y notificaciones. |
+          | Calixto Isaac Galeana Medrano | Desarrollador de interfaz | 10 h/semana | Pantallas de eventos, tablero de tareas y calendario. |
+          | Uziel García | Desarrollador y QA | 10 h/semana | Registro de asistentes, correos, pruebas y exportaciones. |
+
+          **Herramientas**
+          | Herramienta | Uso | Costo |
+          |---|---|---|
+          | GitHub (repositorio, Issues, Projects, Actions, Pages) | Código, backlog, sprints, seguimiento, CI/CD y hospedaje de la interfaz | Gratis |
+          | Cloudflare Workers + D1 | API y base de datos | Gratis (plan Free) |
+          | Servicio de correo transaccional | Envío de notificaciones | Gratis hasta el límite mensual |
+          | Visual Studio Code | Desarrollo | Gratis |
+          | Microsoft Teams / WhatsApp | Daily Scrum y comunicación del equipo | Gratis |
+
+          **Tiempo:** 1 semana de planeación más 4 sprints de 1 semana, unas 44 horas-persona por sprint.
+
+          ## 7.2 Tareas y dependencias
+
+          | ID | Tarea | Responsable | Duración | Depende de |
+          |---|---|---|---|---|
+          | T1 | Objetivos y funcionalidades | Antonio | 1 día | — |
+          | T2 | Modelo de datos y ERD | David | 1 día | T1 |
+          | T3 | Product Backlog y estimación (Planning Poker) | Equipo | 1 día | T1 |
+          | T4 | Arquitectura | David | 1 día | T2 |
+          | T5 | Flujos de trabajo (BPMN) | Stephanie | 1 día | T1 |
+          | T6 | Wireframes y prototipo navegable | Isaac | 2 días | T1, T5 |
+          | T7 | Plan de sprints, recursos y cronograma | Stephanie | 1 día | T3 |
+          | T8 | Configurar repositorio, GitHub Projects y Actions | Antonio | 1 día | T3 |
+          | S1 | Sprint 1: acceso, eventos y registro (21 pts) | Equipo | 1 semana | T2, T4, T6, T8 |
+          | S2 | Sprint 2: asistentes y tareas (21 pts) | Equipo | 1 semana | S1 (eventos y registro) |
+          | S3 | Sprint 3: notificaciones (19 pts) | Equipo | 1 semana | S2 (cupo, lista de espera y tareas) |
+          | S4 | Sprint 4: calendario y seguimiento (20 pts) | Equipo | 1 semana | S1 (eventos), S2 (tareas) |
+          | P1 | Pruebas finales y despliegue | Uziel | 2 días | S4 |
+          | P2 | Entrega final | Antonio | 1 día | P1 |
+
+          **Dependencias críticas:** no se pueden registrar asistentes (HU-05) sin eventos publicados (HU-02 y HU-03); las notificaciones de cambios y recordatorios (HU-13 y HU-14) necesitan el registro y el control de cupo (HU-05 y HU-07); el panel del evento (HU-18) necesita registros y tareas (HU-07 y HU-09).
+
+          ## 7.3 Cronograma
+
+          ~~~mermaid
+          gantt
+              title Gestión de Eventos GCS · Cronograma
+              dateFormat YYYY-MM-DD
+              axisFormat %d/%m
+              todayMarker off
+
+              section Fase 1 · Planeación (Sprint 0)
+              Objetivos y funcionalidades          :done, t1, 2026-10-26, 1d
+              Modelo de datos y ERD                :done, t2, after t1, 1d
+              Product Backlog y estimación         :done, t3, after t1, 1d
+              Arquitectura                         :done, t4, after t2, 1d
+              Flujos de trabajo BPMN               :done, t5, after t1, 1d
+              Wireframes y prototipo               :done, t6, after t5, 2d
+              Plan de sprints y cronograma         :done, t7, after t3, 1d
+              Repositorio y GitHub Projects        :done, t8, 2026-10-30, 1d
+              Entrega del avance                   :milestone, m0, 2026-10-31, 0d
+
+              section Fase 2 · Desarrollo
+              Sprint 1 · Base y eventos (21 pts)           :s1, 2026-11-02, 7d
+              Sprint 2 · Asistentes y tareas (21 pts)      :s2, after s1, 7d
+              Sprint 3 · Notificaciones (19 pts)           :s3, after s2, 7d
+              Sprint 4 · Calendario y seguimiento (20 pts) :s4, after s3, 7d
+
+              section Cierre
+              Pruebas finales y despliegue         :p1, 2026-11-30, 2d
+              Entrega final                        :milestone, m1, 2026-12-02, 0d
+          ~~~
+
+          ## 7.4 Progreso esperado (burn-up)
+
+          | Fin de | Puntos acumulados | % del backlog |
+          |---|---|---|
+          | Sprint 1 (8 nov) | 21 | 26% |
+          | Sprint 2 (15 nov) | 42 | 52% |
+          | Sprint 3 (22 nov) | 61 | 75% |
+          | Sprint 4 (29 nov) | 81 | 100% |
+
+          El avance se sigue en **GitHub Projects**: el progreso de cada milestone (sprint) muestra las historias cerradas, y la vista de cronograma muestra los sprints en el tiempo. Si al cierre de un sprint la velocidad real es menor a la planeada, el Product Owner mueve las historias de prioridad baja (HU-19 y HU-20) al siguiente sprint.
+          FIN_5
+          cat > 'docs/index.html' <<'FIN_6'
+          <!doctype html>
+          <html lang="es">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Prototipo · Gestión de Eventos GCS</title>
+          <style>
+          :root{--ink:#222;--mid:#666;--soft:#999;--line:#c9c9c9;--fill:#efefef;--fill2:#e2e2e2;--bg:#fafafa;--acc:#333}
+          *{box-sizing:border-box}
+          body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+          a{color:inherit}
+          .banner{background:#222;color:#fff;font-size:12px;padding:6px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+          .banner b{letter-spacing:.04em}
+          .banner select{font:inherit;padding:2px 4px}
+          .app{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 31px)}
+          .side{background:#fff;border-right:1px solid var(--line);padding:16px 12px}
+          .logo{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:20px}
+          .logo i{width:28px;height:28px;border:2px solid var(--ink);display:inline-block;border-radius:6px;position:relative}
+          .logo i:after{content:"";position:absolute;inset:5px;border:1px dashed var(--ink)}
+          .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;text-decoration:none;color:var(--mid);margin-bottom:2px}
+          .nav a:hover{background:var(--fill)}
+          .nav a.on{background:var(--fill2);color:var(--ink);font-weight:600}
+          .nav a span{width:16px;height:16px;border:1.5px solid currentColor;border-radius:3px;flex:none}
+          .side .who{margin-top:24px;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--mid)}
+          main{padding:20px 28px 40px;min-width:0}
+          .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+          h1{font-size:22px;margin:0}
+          h2{font-size:16px;margin:0 0 10px}
+          .crumb{font-size:12px;color:var(--soft);margin-bottom:4px}
+          .btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);background:#fff;padding:7px 14px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+          .btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+          .btn.sm{padding:4px 10px;font-size:12px}
+          .card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}
+          .grid{display:grid;gap:14px}
+          .g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:2fr 1fr}
+          .kpi .n{font-size:26px;font-weight:700}.kpi .l{color:var(--mid);font-size:12px}
+          .bar{height:8px;background:var(--fill2);border-radius:4px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:#777}
+          table{width:100%;border-collapse:collapse;background:#fff}
+          th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+          th{font-size:12px;color:var(--mid);font-weight:600;background:var(--fill)}
+          td.wrap{white-space:normal}
+          .tag{display:inline-block;border:1px solid var(--soft);border-radius:10px;padding:1px 8px;font-size:11px;color:var(--mid);background:#fff}
+          .tag.dark{background:#555;color:#fff;border-color:#555}
+          .tag.red{border-color:#b33;color:#b33}
+          .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+          .in{border:1.5px solid var(--line);border-radius:6px;padding:7px 10px;background:#fff;color:var(--soft);min-width:130px}
+          .in.w{flex:1;min-width:200px}
+          label{display:block;font-size:12px;font-weight:600;margin:0 0 4px}
+          .field{margin-bottom:14px}
+          .field .in{width:100%;color:var(--soft)}
+          .req:after{content:" *";color:#b33}
+          .radio{display:flex;gap:16px;color:var(--mid)}
+          .radio span:before{content:"";display:inline-block;width:12px;height:12px;border:1.5px solid var(--mid);border-radius:50%;margin-right:6px;vertical-align:-1px}
+          .radio span.on:before{background:var(--ink);box-shadow:inset 0 0 0 2px #fff}
+          .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px}
+          .tabs a{padding:8px 14px;text-decoration:none;color:var(--mid);border-bottom:2px solid transparent}
+          .tabs a.on{color:var(--ink);border-color:var(--ink);font-weight:600}
+          .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+          .col{background:var(--fill);border-radius:8px;padding:10px;min-height:340px}
+          .col h3{font-size:13px;margin:0 0 10px;display:flex;justify-content:space-between}
+          .tk{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px}
+          .tk b{display:block;font-size:13px;margin-bottom:6px}
+          .tk .m{display:flex;justify-content:space-between;font-size:11px;color:var(--mid)}
+          .av{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--fill2);border:1px solid var(--soft);font-size:10px;align-items:center;justify-content:center;font-weight:700;color:var(--ink)}
+          .cal{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);background:#fff}
+          .cal div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:92px;padding:4px 6px;font-size:12px}
+          .cal .h{min-height:auto;background:var(--fill);font-weight:600;color:var(--mid);text-align:center}
+          .cal .o{color:#ccc}
+          .ev{display:block;margin-top:4px;padding:2px 5px;border-radius:3px;font-size:11px;background:var(--fill2);border-left:3px solid #555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+          .ev.t2{border-left-style:dashed}.ev.t3{border-left-color:#999}.ev.t4{border-left:3px double #555}
+          .legend{display:flex;gap:14px;font-size:12px;color:var(--mid);margin-top:10px;flex-wrap:wrap}
+          .note{border:1.5px dashed var(--soft);color:var(--mid);padding:10px;border-radius:6px;font-size:12px}
+          .img{background:repeating-linear-gradient(45deg,var(--fill),var(--fill) 8px,#e7e7e7 8px,#e7e7e7 16px);border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:12px}
+          .screen{display:none}.screen.on{display:block}
+          .login{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 31px)}
+          .login .card{width:360px;padding:28px}
+          .public{max-width:760px;margin:24px auto;padding:0 16px}
+          .hidden-shell .app{display:block}.hidden-shell .side{display:none}
+          .list li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+          .list{list-style:none;margin:0;padding:0}.list .tag{align-self:center;white-space:nowrap}
+          @media (max-width:900px){.app{grid-template-columns:1fr}.side{display:none}.g4,.g3,.g2,.kanban{grid-template-columns:1fr}main{padding:16px}}
+          </style>
+          </head>
+          <body>
+          <div class="banner"><b>PROTOTIPO · WIREFRAMES</b> Gestión de Eventos GCS — Equipo 1 · Navega con el menú o elige una pantalla:
+          <select id="go" aria-label="Ir a pantalla">
+          <option value="login">1. Inicio de sesión</option><option value="inicio">2. Inicio</option><option value="eventos">3. Eventos</option><option value="nuevo">4. Nuevo evento</option><option value="detalle">5. Detalle del evento</option><option value="asistentes">6. Asistentes</option><option value="tareas">7. Tareas del evento</option><option value="calendario">8. Calendario</option><option value="notificaciones">9. Notificaciones</option><option value="registro">10. Registro público</option>
+          </select></div>
+
+          <!-- 1. Login -->
+          <section class="screen" id="s-login"><div class="login"><div class="card">
+          <div class="logo"><i></i> GCS · Eventos</div>
+          <h1 style="margin-bottom:6px">Iniciar sesión</h1><p style="color:var(--mid);margin-top:0">Acceso para el equipo de Global Consulting Services</p>
+          <div class="field"><label>Correo</label><div class="in">nombre@gcs.com</div></div>
+          <div class="field"><label>Contraseña</label><div class="in">••••••••</div></div>
+          <a class="btn pri" style="width:100%;justify-content:center" href="#inicio">Entrar</a>
+          <p style="font-size:12px;color:var(--soft);text-align:center">¿Olvidaste tu contraseña?</p>
+          </div></div></section>
+
+          <div class="app" id="shell">
+          <aside class="side">
+          <div class="logo"><i></i> GCS · Eventos</div>
+          <nav class="nav">
+          <a href="#inicio" data-s="inicio"><span></span>Inicio</a>
+          <a href="#eventos" data-s="eventos detalle nuevo asistentes"><span></span>Eventos</a>
+          <a href="#tareas" data-s="tareas"><span></span>Tareas</a>
+          <a href="#calendario" data-s="calendario"><span></span>Calendario</a>
+          <a href="#notificaciones" data-s="notificaciones"><span></span>Notificaciones</a>
+          <a href="#inicio" data-s="usuarios"><span></span>Usuarios</a>
+          </nav>
+          <div class="who"><span class="av">AA</span> Antonio Anaya<br>Organizador · <a href="#login">Salir</a></div>
+          </aside>
+          <main>
+
+          <!-- 2. Inicio -->
+          <section class="screen" id="s-inicio">
+          <div class="top"><div><div class="crumb">Inicio</div><h1>Hola, Antonio</h1></div><a class="btn pri" href="#nuevo">+ Nuevo evento</a></div>
+          <div class="grid g4" style="margin-bottom:14px">
+          <div class="card kpi"><div class="n">12</div><div class="l">Eventos este trimestre</div></div>
+          <div class="card kpi"><div class="n">486</div><div class="l">Asistentes confirmados</div></div>
+          <div class="card kpi"><div class="n">7</div><div class="l">Mis tareas pendientes</div></div>
+          <div class="card kpi"><div class="n">2</div><div class="l">Tareas vencidas</div></div>
+          </div>
+          <div class="grid g2">
+          <div class="card"><h2>Próximos eventos</h2>
+          <table><tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Inscritos</th></tr>
+          <tr><td><a href="#detalle">Cumbre de Transformación Digital</a></td><td><span class="tag">Conferencia</span></td><td>18 nov · Madrid</td><td>182/250</td></tr>
+          <tr><td>Webinar: Riesgo regulatorio 2027</td><td><span class="tag">Webinar</span></td><td>20 nov · Virtual</td><td>310/500</td></tr>
+          <tr><td>Capacitación en liderazgo ágil</td><td><span class="tag">Capacitación</span></td><td>25 nov · CDMX</td><td>28/30</td></tr>
+          <tr><td>Reunión de consejo – Cliente Norte</td><td><span class="tag">Reunión ejecutiva</span></td><td>27 nov · Nueva York</td><td>12/15</td></tr>
+          </table></div>
+          <div class="card"><h2>Mis tareas</h2>
+          <ul class="list">
+          <li><span>Confirmar catering<br><small style="color:var(--soft)">Cumbre de Transformación Digital</small></span><span class="tag red">Vencida</span></li>
+          <li><span>Enviar agenda a ponentes<br><small style="color:var(--soft)">Cumbre de Transformación Digital</small></span><span class="tag">Hoy</span></li>
+          <li><span>Probar enlace del webinar<br><small style="color:var(--soft)">Webinar: Riesgo regulatorio</small></span><span class="tag">19 nov</span></li>
+          </ul><p><a href="#tareas">Ver todas →</a></p></div>
+          </div>
+          </section>
+
+          <!-- 3. Eventos -->
+          <section class="screen" id="s-eventos">
+          <div class="top"><div><div class="crumb">Eventos</div><h1>Eventos</h1></div><a class="btn pri" href="#nuevo">+ Nuevo evento</a></div>
+          <div class="filters"><div class="in w">Buscar evento…</div><div class="in">Tipo ▾</div><div class="in">Región ▾</div><div class="in">Estado ▾</div><div class="in">Fechas ▾</div></div>
+          <table>
+          <tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Región</th><th>Modalidad</th><th>Inscritos / cupo</th><th>Estado</th><th></th></tr>
+          <tr><td><a href="#detalle">Cumbre de Transformación Digital</a></td><td>Conferencia</td><td>18–19 nov 2026</td><td>Europa</td><td>Híbrido</td><td>182 / 250</td><td><span class="tag dark">Publicado</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+          <tr><td>Webinar: Riesgo regulatorio 2027</td><td>Webinar</td><td>20 nov 2026</td><td>Global</td><td>Virtual</td><td>310 / 500</td><td><span class="tag dark">Publicado</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+          <tr><td>Capacitación en liderazgo ágil</td><td>Capacitación</td><td>25 nov 2026</td><td>Latinoamérica</td><td>Presencial</td><td>28 / 30</td><td><span class="tag dark">Publicado</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+          <tr><td>Reunión de consejo – Cliente Norte</td><td>Reunión ejecutiva</td><td>27 nov 2026</td><td>Norteamérica</td><td>Presencial</td><td>12 / 15</td><td><span class="tag">Solo invitación</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+          <tr><td>Foro de Sostenibilidad Asia</td><td>Conferencia</td><td>3–4 dic 2026</td><td>Asia-Pacífico</td><td>Presencial</td><td>0 / 400</td><td><span class="tag">Borrador</span></td><td><a class="btn sm" href="#nuevo">Editar</a></td></tr>
+          </table>
+          <p style="color:var(--soft);font-size:12px">Mostrando 5 de 12 eventos · ‹ 1 2 3 ›</p>
+          </section>
+
+          <!-- 4. Nuevo evento -->
+          <section class="screen" id="s-nuevo">
+          <div class="top"><div><div class="crumb">Eventos › Nuevo</div><h1>Nuevo evento</h1></div></div>
+          <div class="grid g2">
+          <div class="card">
+          <div class="field"><label class="req">Nombre del evento</label><div class="in">Ej. Cumbre de Transformación Digital</div></div>
+          <div class="grid g3" style="gap:12px">
+          <div class="field"><label class="req">Tipo</label><div class="in">Conferencia ▾</div></div>
+          <div class="field"><label class="req">Cliente</label><div class="in">Seleccionar cliente ▾</div></div>
+          <div class="field"><label class="req">Cupo máximo</label><div class="in">250</div></div>
+          </div>
+          <div class="grid g3" style="gap:12px">
+          <div class="field"><label class="req">Inicio</label><div class="in">18/11/2026 09:00</div></div>
+          <div class="field"><label class="req">Fin</label><div class="in">19/11/2026 18:00</div></div>
+          <div class="field"><label class="req">Zona horaria</label><div class="in">Europe/Madrid ▾</div></div>
+          </div>
+          <div class="field"><label class="req">Modalidad</label><div class="radio"><span>Presencial</span><span>Virtual</span><span class="on">Híbrido</span></div></div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Sede</label><div class="in">Hotel Meliá Castilla, Madrid ▾</div></div>
+          <div class="field"><label>Enlace virtual</label><div class="in">https://…</div></div>
+          </div>
+          <div class="field"><label>Descripción</label><div class="in" style="height:80px">Agenda, objetivos y público del evento…</div></div>
+          <div class="field"><label><input type="checkbox" disabled> Solo por invitación</label></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end"><a class="btn" href="#eventos">Cancelar</a><a class="btn" href="#detalle">Guardar borrador</a><a class="btn pri" href="#detalle">Publicar</a></div>
+          </div>
+          <div><div class="note"><b>Reglas</b><br>· La fecha de fin no puede ser anterior al inicio.<br>· Presencial o híbrido requiere sede; virtual requiere enlace.<br>· Al publicar se habilita el registro y se programa el recordatorio 24 h antes.</div></div>
+          </div>
+          </section>
+
+          <!-- 5. Detalle -->
+          <section class="screen" id="s-detalle">
+          <div class="top"><div><div class="crumb">Eventos › Cumbre de Transformación Digital</div><h1>Cumbre de Transformación Digital</h1>
+          <span class="tag dark">Publicado</span> <span class="tag">Conferencia</span> <span class="tag">Híbrido</span> <span style="color:var(--mid);font-size:12px">18–19 nov 2026 · Madrid (CET)</span></div>
+          <div style="display:flex;gap:8px"><a class="btn" href="#nuevo">Editar</a><a class="btn" href="#notificaciones">Enviar aviso</a></div></div>
+          <div class="tabs"><a class="on" href="#detalle">Resumen</a><a href="#asistentes">Asistentes</a><a href="#tareas">Tareas</a><a href="#notificaciones">Notificaciones</a></div>
+          <div class="grid g3" style="margin-bottom:14px">
+          <div class="card kpi"><div class="l">Cupo ocupado</div><div class="n">182 / 250</div><div class="bar"><i style="width:73%"></i></div></div>
+          <div class="card kpi"><div class="l">Lista de espera</div><div class="n">0</div><div class="l">Se activa al llenarse el cupo</div></div>
+          <div class="card kpi"><div class="l">Tareas hechas</div><div class="n">9 / 14</div><div class="bar"><i style="width:64%"></i></div></div>
+          </div>
+          <div class="grid g2">
+          <div class="card"><h2>Información</h2>
+          <table><tr><td>Cliente</td><td>Grupo Financiero Atlas</td></tr><tr><td>Sede</td><td>Hotel Meliá Castilla, Madrid</td></tr><tr><td>Enlace virtual</td><td>https://meet…/cumbre</td></tr><tr><td>Organizador</td><td>Antonio Anaya</td></tr><tr><td>Recordatorio</td><td>Programado: 17 nov, 09:00 CET</td></tr></table></div>
+          <div class="card"><h2>Actividad reciente</h2><ul class="list">
+          <li><span>María López se registró</span><small>hace 10 min</small></li>
+          <li><span>Tarea "Reservar salas" → Hecha</span><small>hace 1 h</small></li>
+          <li><span>Aviso de cambio de sala enviado (182)</span><small>ayer</small></li></ul></div>
+          </div>
+          </section>
+
+          <!-- 6. Asistentes -->
+          <section class="screen" id="s-asistentes">
+          <div class="top"><div><div class="crumb">Eventos › Cumbre de Transformación Digital › Asistentes</div><h1>Asistentes</h1></div>
+          <div style="display:flex;gap:8px"><a class="btn" href="#asistentes">Exportar CSV</a><a class="btn pri" href="#registro">+ Agregar asistente</a></div></div>
+          <div class="tabs"><a href="#detalle">Resumen</a><a class="on" href="#asistentes">Asistentes</a><a href="#tareas">Tareas</a><a href="#notificaciones">Notificaciones</a></div>
+          <div class="filters"><div class="in w">Buscar por nombre, correo o empresa…</div><div class="in">Estado ▾</div><div class="in">Asistencia ▾</div>
+          <span class="tag dark">Confirmados 182</span><span class="tag">En espera 0</span><span class="tag">Cancelados 6</span></div>
+          <table>
+          <tr><th>Nombre</th><th>Empresa</th><th>Cargo</th><th>País</th><th>Registro</th><th>Estado</th><th>Check-in</th><th></th></tr>
+          <tr><td>María López</td><td>Atlas</td><td>Directora de TI</td><td>España</td><td>30 oct</td><td><span class="tag dark">Confirmado</span></td><td>—</td><td><a class="btn sm" href="#asistentes">Check-in</a></td></tr>
+          <tr><td>James Carter</td><td>Northwind</td><td>CFO</td><td>EE. UU.</td><td>29 oct</td><td><span class="tag dark">Confirmado</span></td><td>—</td><td><a class="btn sm" href="#asistentes">Check-in</a></td></tr>
+          <tr><td>Ana Souza</td><td>Banco Sul</td><td>Gerente de riesgos</td><td>Brasil</td><td>28 oct</td><td><span class="tag dark">Confirmado</span></td><td>—</td><td><a class="btn sm" href="#asistentes">Check-in</a></td></tr>
+          <tr><td>Kenji Sato</td><td>Hikari Corp</td><td>VP Operaciones</td><td>Japón</td><td>27 oct</td><td><span class="tag">Cancelado</span></td><td>—</td><td></td></tr>
+          </table>
+          </section>
+
+          <!-- 7. Tareas -->
+          <section class="screen" id="s-tareas">
+          <div class="top"><div><div class="crumb">Eventos › Cumbre de Transformación Digital › Tareas</div><h1>Tareas del evento</h1></div><a class="btn pri" href="#tareas">+ Nueva tarea</a></div>
+          <div class="tabs"><a href="#detalle">Resumen</a><a href="#asistentes">Asistentes</a><a class="on" href="#tareas">Tareas</a><a href="#notificaciones">Notificaciones</a></div>
+          <div class="filters"><div class="in">Responsable ▾</div><div class="in">Prioridad ▾</div><div class="in">Solo mis tareas ☐</div></div>
+          <div class="kanban">
+          <div class="col"><h3>Pendiente <span>3</span></h3>
+          <div class="tk"><b>Confirmar catering</b><div class="m"><span class="tag red">Vencida · 28 oct</span><span class="av">AA</span></div></div>
+          <div class="tk"><b>Imprimir gafetes</b><div class="m"><span>15 nov · Media</span><span class="av">UG</span></div></div>
+          <div class="tk"><b>Prueba de audio y video</b><div class="m"><span>17 nov · Alta</span><span class="av">CG</span></div></div></div>
+          <div class="col"><h3>En curso <span>2</span></h3>
+          <div class="tk"><b>Enviar agenda a ponentes</b><div class="m"><span>Hoy · Alta</span><span class="av">AA</span></div></div>
+          <div class="tk"><b>Diseñar presentación de apertura</b><div class="m"><span>12 nov · Media</span><span class="av">SR</span></div></div></div>
+          <div class="col"><h3>Hecha <span>9</span></h3>
+          <div class="tk"><b>Reservar salas</b><div class="m"><span>Hecha 30 oct</span><span class="av">DA</span></div></div>
+          <div class="tk"><b>Contratar ponente principal</b><div class="m"><span>Hecha 20 oct</span><span class="av">AA</span></div></div>
+          <div class="tk" style="color:var(--soft)">+ 7 más</div></div>
+          </div>
+          </section>
+
+          <!-- 8. Calendario -->
+          <section class="screen" id="s-calendario">
+          <div class="top"><div><div class="crumb">Calendario</div><h1>Noviembre 2026</h1></div>
+          <div style="display:flex;gap:8px"><span class="btn sm">‹</span><span class="btn sm">Hoy</span><span class="btn sm">›</span><span class="btn sm pri">Mes</span><span class="btn sm">Semana</span></div></div>
+          <div class="filters"><div class="in">Región: Todas ▾</div><div class="in">Tipo: Todos ▾</div><div class="in">Zona horaria: America/Mexico_City ▾</div></div>
+          <div class="cal">
+          <div class="h">Lun</div><div class="h">Mar</div><div class="h">Mié</div><div class="h">Jue</div><div class="h">Vie</div><div class="h">Sáb</div><div class="h">Dom</div>
+          <div class="o">26</div><div class="o">27</div><div class="o">28</div><div class="o">29</div><div class="o">30</div><div class="o">31</div><div>1</div>
+          <div>2</div><div>3</div><div>4<a class="ev t3" href="#detalle">Webinar ESG</a></div><div>5</div><div>6</div><div>7</div><div>8</div>
+          <div>9</div><div>10<a class="ev t2" href="#detalle">Capacitación Excel</a></div><div>11</div><div>12</div><div>13<a class="ev t4" href="#detalle">Reunión CEO Atlas</a></div><div>14</div><div>15</div>
+          <div>16</div><div>17</div><div>18<a class="ev" href="#detalle">Cumbre Transf. Digital</a></div><div>19<a class="ev" href="#detalle">Cumbre Transf. Digital</a></div><div>20<a class="ev t3" href="#detalle">Webinar Riesgo 2027</a></div><div>21</div><div>22</div>
+          <div>23</div><div>24</div><div>25<a class="ev t2" href="#detalle">Liderazgo ágil</a></div><div>26</div><div>27<a class="ev t4" href="#detalle">Consejo Cliente Norte</a></div><div>28</div><div>29</div>
+          </div>
+          <div class="legend"><span>▌ Conferencia</span><span>┆ Capacitación</span><span style="color:var(--soft)">▌ Webinar</span><span>‖ Reunión ejecutiva</span><span>· Clic en un evento para abrir su detalle</span></div>
+          </section>
+
+          <!-- 9. Notificaciones -->
+          <section class="screen" id="s-notificaciones">
+          <div class="top"><div><div class="crumb">Notificaciones</div><h1>Notificaciones</h1></div></div>
+          <div class="grid g2">
+          <div class="card"><h2>Historial de envíos</h2>
+          <div class="filters"><div class="in">Evento ▾</div><div class="in">Tipo ▾</div></div>
+          <table><tr><th>Fecha</th><th>Evento</th><th>Tipo</th><th>Destinatarios</th><th>Estado</th></tr>
+          <tr><td>29 oct 18:02</td><td>Cumbre Transf. Digital</td><td>Cambio de sala</td><td>182</td><td><span class="tag dark">Enviada</span></td></tr>
+          <tr><td>17 nov 09:00</td><td>Cumbre Transf. Digital</td><td>Recordatorio 24 h</td><td>182</td><td><span class="tag">Programada</span></td></tr>
+          <tr><td>28 oct 10:15</td><td>Webinar Riesgo 2027</td><td>Confirmación</td><td>1</td><td><span class="tag dark">Enviada</span></td></tr>
+          <tr><td>27 oct 12:40</td><td>Liderazgo ágil</td><td>Mensaje</td><td>28</td><td><span class="tag red">2 fallidas</span></td></tr>
+          </table></div>
+          <div class="card"><h2>Enviar mensaje</h2>
+          <div class="field"><label class="req">Evento</label><div class="in">Cumbre de Transformación Digital ▾</div></div>
+          <div class="field"><label class="req">Destinatarios</label><div class="radio" style="flex-wrap:wrap"><span class="on">Confirmados</span><span>En espera</span><span>Todos</span></div></div>
+          <div class="field"><label class="req">Asunto</label><div class="in">Materiales de la cumbre</div></div>
+          <div class="field"><label class="req">Mensaje</label><div class="in" style="height:90px">Escribe el mensaje…</div></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end"><span class="btn">Vista previa</span><span class="btn pri">Enviar</span></div>
+          <p class="note" style="margin-top:12px">Automáticas: confirmación de registro, aviso de cambios o cancelación y recordatorio 24 h antes.</p></div>
+          </div>
+          </section>
+
+          </main>
+          </div>
+
+          <!-- 10. Registro público -->
+          <section class="screen" id="s-registro"><div class="public">
+          <div class="logo"><i></i> Global Consulting Services</div>
+          <div class="img" style="height:140px;margin-bottom:16px">Imagen del evento</div>
+          <h1>Cumbre de Transformación Digital</h1>
+          <p style="color:var(--mid)">18–19 de noviembre de 2026 · Hotel Meliá Castilla, Madrid y en línea · Lugares disponibles: 68</p>
+          <div class="card">
+          <h2>Regístrate</h2>
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label class="req">Nombre</label><div class="in">Nombre</div></div>
+          <div class="field"><label class="req">Apellidos</label><div class="in">Apellidos</div></div>
+          <div class="field"><label class="req">Correo</label><div class="in">correo@empresa.com</div></div>
+          <div class="field"><label>Teléfono</label><div class="in">+52 …</div></div>
+          <div class="field"><label class="req">Empresa</label><div class="in">Empresa</div></div>
+          <div class="field"><label class="req">Cargo</label><div class="in">Cargo</div></div>
+          <div class="field"><label class="req">País</label><div class="in">Seleccionar país ▾</div></div>
+          <div class="field"><label>Modalidad de asistencia</label><div class="radio"><span class="on">Presencial</span><span>En línea</span></div></div>
+          </div>
+          <div class="field"><label><input type="checkbox" disabled> Acepto el aviso de privacidad</label></div>
+          <a class="btn pri" href="#registro" onclick="document.getElementById('ok').style.display='block';return false">Confirmar registro</a>
+          <div id="ok" class="note" style="display:none;margin-top:12px"><b>¡Registro confirmado!</b> Te enviamos un correo con los detalles. Si el cupo está lleno, quedarás en lista de espera y te avisaremos si se libera un lugar.</div>
+          </div>
+          <p style="font-size:12px"><a href="#eventos">← Volver a la vista del organizador</a></p>
+          </div></section>
+
+          <script>
+          const sel=document.getElementById('go');
+          function show(){
+            const id=(location.hash||'#inicio').slice(1);
+            document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+id));
+            const full=id==='login'||id==='registro';
+            document.getElementById('shell').style.display=full?'none':'';
+            document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.s.split(' ').includes(id)));
+            sel.value=id; window.scrollTo(0,0);
+          }
+          sel.onchange=()=>{location.hash=sel.value};
+          addEventListener('hashchange',show); show();
+          </script>
+          </body>
+          </html>
+          FIN_6
+          cat > '.github/backlog.json' <<'FIN_7'
+          {
+            "sprints": [
+              {"titulo": "Sprint 1 – Base y eventos", "inicio": "2026-11-02", "fin": "2026-11-08", "objetivo": "El organizador puede iniciar sesión, crear, editar y consultar eventos, y un asistente puede registrarse a un evento."},
+              {"titulo": "Sprint 2 – Asistentes y tareas", "inicio": "2026-11-09", "fin": "2026-11-15", "objetivo": "El organizador da seguimiento a los asistentes (cupo, lista de espera, check-in) y asigna tareas al equipo en un tablero por evento."},
+              {"titulo": "Sprint 3 – Comunicación y notificaciones", "inicio": "2026-11-16", "fin": "2026-11-22", "objetivo": "Los asistentes reciben confirmaciones, avisos de cambios y recordatorios automáticos, y el equipo ve sus tareas pendientes y vencidas."},
+              {"titulo": "Sprint 4 – Calendario y seguimiento", "inicio": "2026-11-23", "fin": "2026-11-29", "objetivo": "GCS visualiza sus eventos en un calendario global y mide inscritos, asistencia y avance de tareas por evento."}
+            ],
+            "epicas": [
+              {"id": "E1", "nombre": "Gestión de eventos"},
+              {"id": "E2", "nombre": "Registro y seguimiento de asistentes"},
+              {"id": "E3", "nombre": "Asignación y seguimiento de tareas"},
+              {"id": "E4", "nombre": "Comunicación y notificaciones"},
+              {"id": "E5", "nombre": "Calendario de eventos"},
+              {"id": "E6", "nombre": "Acceso y administración"}
+            ],
+            "historias": [
+              {"id": "HU-01", "epica": "E6", "sprint": 1, "puntos": 5, "prioridad": "Alta", "responsable": "David",
+               "titulo": "Iniciar sesión con mi rol",
+               "historia": "Como miembro del equipo de GCS, quiero iniciar sesión con mi correo y contraseña, para acceder solo a las funciones que corresponden a mi rol (administrador, organizador o miembro).",
+               "criterios": ["Solo usuarios dados de alta pueden entrar", "El menú muestra únicamente las opciones del rol", "Tras 5 intentos fallidos la cuenta se bloquea 15 minutos"]},
+              {"id": "HU-02", "epica": "E1", "sprint": 1, "puntos": 5, "prioridad": "Alta", "responsable": "Isaac",
+               "titulo": "Crear un evento",
+               "historia": "Como organizador, quiero crear un evento con su tipo, fechas, zona horaria, modalidad, sede o enlace virtual, cliente y cupo, para dejar de planificarlo en hojas de cálculo.",
+               "criterios": ["Tipos: conferencia, capacitación, webinar o reunión ejecutiva", "La fecha de fin no puede ser anterior a la de inicio", "Si es virtual se pide enlace; si es presencial, sede", "El evento se guarda como Borrador hasta publicarlo"]},
+              {"id": "HU-03", "epica": "E1", "sprint": 1, "puntos": 3, "prioridad": "Alta", "responsable": "Isaac",
+               "titulo": "Editar, publicar o cancelar un evento",
+               "historia": "Como organizador, quiero editar, publicar o cancelar un evento, para mantener la información actualizada.",
+               "criterios": ["Solo los eventos publicados aceptan registros", "Cancelar pide un motivo y no borra los datos", "Cada cambio queda registrado con fecha y usuario"]},
+              {"id": "HU-04", "epica": "E1", "sprint": 1, "puntos": 3, "prioridad": "Alta", "responsable": "David",
+               "titulo": "Consultar la lista de eventos con filtros",
+               "historia": "Como organizador, quiero ver todos los eventos y filtrarlos por tipo, región, estado y fecha, para encontrar rápido el que necesito.",
+               "criterios": ["Muestra nombre, tipo, fecha, región, estado e inscritos/cupo", "Los filtros se pueden combinar", "Ordena por fecha de inicio de forma predeterminada"]},
+              {"id": "HU-05", "epica": "E2", "sprint": 1, "puntos": 5, "prioridad": "Alta", "responsable": "Uziel",
+               "titulo": "Registrarme a un evento",
+               "historia": "Como asistente, quiero registrarme a un evento con un formulario sencillo, para asegurar mi lugar sin enviar correos.",
+               "criterios": ["Pide nombre, correo, empresa, cargo y país", "No permite registrar dos veces el mismo correo en un evento", "Si hay cupo el registro queda Confirmado"]},
+
+              {"id": "HU-06", "epica": "E2", "sprint": 2, "puntos": 3, "prioridad": "Alta", "responsable": "Uziel",
+               "titulo": "Ver y buscar asistentes de un evento",
+               "historia": "Como organizador, quiero ver la lista de asistentes de un evento y buscarlos por nombre, empresa o estado, para dar seguimiento a cada participante.",
+               "criterios": ["Muestra estado del registro y si asistió", "Búsqueda por nombre, correo o empresa", "Muestra totales: confirmados, en espera y cancelados"]},
+              {"id": "HU-07", "epica": "E2", "sprint": 2, "puntos": 5, "prioridad": "Alta", "responsable": "David",
+               "titulo": "Controlar cupo y lista de espera",
+               "historia": "Como organizador, quiero que el sistema controle el cupo y mande a lista de espera a quien se registre cuando el evento esté lleno, para no sobrevender lugares.",
+               "criterios": ["Al llegar al cupo, los nuevos registros quedan En espera", "Si alguien cancela, el primero en espera pasa a Confirmado", "El organizador puede confirmar o cancelar manualmente"]},
+              {"id": "HU-08", "epica": "E2", "sprint": 2, "puntos": 3, "prioridad": "Media", "responsable": "Uziel",
+               "titulo": "Registrar asistencia (check-in)",
+               "historia": "Como organizador, quiero marcar la asistencia de cada participante el día del evento, para saber quién asistió realmente.",
+               "criterios": ["Solo disponible el día del evento", "Guarda la hora del check-in", "Se puede buscar al asistente por nombre o correo"]},
+              {"id": "HU-09", "epica": "E3", "sprint": 2, "puntos": 5, "prioridad": "Alta", "responsable": "David",
+               "titulo": "Crear y asignar tareas de un evento",
+               "historia": "Como organizador, quiero crear tareas ligadas a un evento y asignarlas a un miembro del equipo con prioridad y fecha límite, para repartir el trabajo sin usar correos.",
+               "criterios": ["Cada tarea pertenece a un evento", "Tiene responsable, prioridad y fecha límite obligatorios", "El responsable recibe un aviso al asignársela"]},
+              {"id": "HU-10", "epica": "E3", "sprint": 2, "puntos": 5, "prioridad": "Alta", "responsable": "Isaac",
+               "titulo": "Tablero de tareas por evento",
+               "historia": "Como miembro del equipo, quiero ver las tareas de un evento en un tablero (Pendiente, En curso, Hecha) y cambiar su estado, para que todos vean el avance.",
+               "criterios": ["Se puede mover una tarea entre columnas", "Muestra responsable y fecha límite en cada tarjeta", "Las tareas vencidas se marcan en rojo"]},
+
+              {"id": "HU-11", "epica": "E3", "sprint": 3, "puntos": 3, "prioridad": "Media", "responsable": "Isaac",
+               "titulo": "Ver mis tareas pendientes y vencidas",
+               "historia": "Como miembro del equipo, quiero ver en una sola pantalla mis tareas de todos los eventos, ordenadas por fecha límite, para organizar mi día.",
+               "criterios": ["Agrupa por Vencidas, Hoy y Próximas", "Permite filtrar por evento", "Abre el detalle de la tarea con un clic"]},
+              {"id": "HU-12", "epica": "E4", "sprint": 3, "puntos": 3, "prioridad": "Alta", "responsable": "Uziel",
+               "titulo": "Confirmación de registro por correo",
+               "historia": "Como asistente, quiero recibir un correo que confirme mi registro con los datos del evento, para tener la información a la mano.",
+               "criterios": ["Se envía en menos de 1 minuto tras registrarse", "Incluye fecha y hora en la zona horaria del evento, sede o enlace", "Si quedó en espera, el correo lo indica"]},
+              {"id": "HU-13", "epica": "E4", "sprint": 3, "puntos": 5, "prioridad": "Alta", "responsable": "David",
+               "titulo": "Avisar a los asistentes cambios o cancelaciones",
+               "historia": "Como organizador, quiero que los asistentes reciban un aviso automático cuando cambie la fecha, la sede o el enlace, o cuando se cancele el evento, para que nadie se quede sin enterarse.",
+               "criterios": ["Se dispara al guardar un cambio en fecha, sede, enlace o estado", "Se envía a confirmados y en espera", "Queda registrado en el historial de notificaciones"]},
+              {"id": "HU-14", "epica": "E4", "sprint": 3, "puntos": 5, "prioridad": "Alta", "responsable": "Uziel",
+               "titulo": "Recordatorio automático antes del evento",
+               "historia": "Como asistente, quiero recibir un recordatorio 24 horas antes del evento, para no olvidarlo.",
+               "criterios": ["Se programa al publicar el evento", "Solo se envía a registros confirmados", "Si el evento cambia de fecha, el recordatorio se reprograma"]},
+              {"id": "HU-15", "epica": "E4", "sprint": 3, "puntos": 3, "prioridad": "Media", "responsable": "Stephanie",
+               "titulo": "Enviar un mensaje a todos los asistentes",
+               "historia": "Como organizador, quiero enviar un mensaje a todos los asistentes de un evento, para compartir materiales o indicaciones.",
+               "criterios": ["Permite elegir destinatarios por estado del registro", "Muestra vista previa antes de enviar", "Queda en el historial de notificaciones"]},
+
+              {"id": "HU-16", "epica": "E5", "sprint": 4, "puntos": 5, "prioridad": "Alta", "responsable": "Isaac",
+               "titulo": "Calendario de eventos",
+               "historia": "Como organizador, quiero ver los eventos programados en un calendario mensual y semanal, para detectar empalmes y planificar el año.",
+               "criterios": ["Vistas mes y semana", "Cada evento se muestra con un color por tipo", "Las horas se muestran en la zona horaria del usuario"]},
+              {"id": "HU-17", "epica": "E5", "sprint": 4, "puntos": 3, "prioridad": "Media", "responsable": "Isaac",
+               "titulo": "Filtrar el calendario y abrir el detalle",
+               "historia": "Como organizador, quiero filtrar el calendario por región y tipo y abrir el detalle de un evento desde ahí, para navegar sin cambiar de pantalla.",
+               "criterios": ["Filtros por región, tipo y estado", "Al hacer clic se abre el resumen del evento", "Desde el resumen se llega al detalle completo"]},
+              {"id": "HU-18", "epica": "E1", "sprint": 4, "puntos": 5, "prioridad": "Media", "responsable": "David",
+               "titulo": "Panel de seguimiento del evento",
+               "historia": "Como organizador, quiero ver en el detalle del evento los inscritos contra el cupo, la asistencia y el avance de tareas, para saber si el evento va en tiempo.",
+               "criterios": ["Muestra % de cupo ocupado y % de asistencia", "Muestra tareas hechas contra totales y vencidas", "Se actualiza al cambiar registros o tareas"]},
+              {"id": "HU-19", "epica": "E4", "sprint": 4, "puntos": 2, "prioridad": "Baja", "responsable": "Uziel",
+               "titulo": "Historial de notificaciones",
+               "historia": "Como organizador, quiero consultar las notificaciones enviadas de un evento, para comprobar qué se comunicó y a quién.",
+               "criterios": ["Muestra tipo, asunto, fecha y número de destinatarios", "Indica envíos fallidos", "Permite ver los destinatarios de cada envío"]},
+              {"id": "HU-20", "epica": "E2", "sprint": 4, "puntos": 2, "prioridad": "Baja", "responsable": "Uziel",
+               "titulo": "Exportar asistentes a CSV",
+               "historia": "Como organizador, quiero exportar la lista de asistentes a un archivo CSV, para compartirla con el cliente.",
+               "criterios": ["Respeta los filtros aplicados", "Incluye estado del registro y asistencia", "El archivo abre correctamente en Excel"]},
+              {"id": "HU-21", "epica": "E6", "sprint": 4, "puntos": 3, "prioridad": "Media", "responsable": "Stephanie",
+               "titulo": "Administrar usuarios del equipo",
+               "historia": "Como administrador, quiero dar de alta y de baja a los miembros del equipo y asignarles un rol, para controlar quién accede a la aplicación.",
+               "criterios": ["Roles: administrador, organizador y miembro", "Desactivar un usuario no borra su historial", "Solo el administrador ve esta pantalla"]}
+            ]
+          }
+          FIN_7
+          cat > '.github/scripts/generar_docs.py' <<'FIN_8'
+          # Genera planeacion/05-product-backlog.md y planeacion/06-plan-de-sprints.md a partir de .github/backlog.json
+          import json
+          d=json.load(open('.github/backlog.json'))
+          H=d['historias'];S=d['sprints'];E={e['id']:e['nombre'] for e in d['epicas']}
+          o=["# 5. Product Backlog","",
+          "Historias de usuario en el formato *Como [rol], quiero [acción], para [beneficio]*, ordenadas por prioridad. Cada una existe como **issue** en el repositorio, con sus criterios de aceptación como lista de verificación.","",
+          "## Técnica de estimación","Se usó **Planning Poker** con la serie de Fibonacci (1, 2, 3, 5, 8). Cada integrante vota en secreto y, si hay diferencia, quienes votaron más alto y más bajo explican su razonamiento antes de volver a votar. Como referencia, **HU-04 (lista de eventos con filtros) = 3 puntos**.","",
+          "| Puntos | Significado |","|---|---|","| 1–2 | Cambio pequeño, sin lógica nueva |","| 3 | Una pantalla o regla sencilla |","| 5 | Pantalla con lógica de negocio o integración (correo, cupo) |","| 8 | Funcionalidad grande: se divide antes de entrar a un sprint |","",
+          "## Épicas","","| Épica | Nombre | Historias | Puntos |","|---|---|---|---|"]
+          for e in d['epicas']:
+              hs=[h for h in H if h['epica']==e['id']]
+              o.append(f"| {e['id']} | {e['nombre']} | {', '.join(h['id'] for h in hs)} | {sum(h['puntos'] for h in hs)} |")
+          o.append(f"| | **Total** | **{len(H)} historias** | **{sum(h['puntos'] for h in H)}** |")
+          o+=["","## Historias de usuario","","| ID | Historia de usuario | Épica | Prioridad | Puntos | Sprint | Responsable |","|---|---|---|---|---|---|---|"]
+          for h in H:
+              o.append(f"| {h['id']} | **{h['titulo']}.** {h['historia']} | {h['epica']} | {h['prioridad']} | {h['puntos']} | {h['sprint']} | {h['responsable']} |")
+          o+=["","## Criterios de aceptación",""]
+          for h in H:
+              o.append(f"**{h['id']} · {h['titulo']}**")
+              o+= [f"- {c}" for c in h['criterios']]
+              o.append("")
+          open('planeacion/05-product-backlog.md','w').write("\n".join(o))
+
+          p=["# 6. Plan de sprints","",
+          "- **Duración:** 4 sprints de 1 semana, del 2 al 29 de noviembre de 2026. La fase 1 (este avance) fue el Sprint 0 de planeación, del 26 al 31 de octubre.",
+          "- **Equipo Scrum (Equipo 1):** Antonio Anaya (Product Owner), Stephanie Ramos Lozano (Scrum Master), David Alfonso Lorenzo, Calixto Isaac Galeana Medrano y Uziel García (Development Team).",
+          "- **Capacidad y velocidad:** 3 desarrolladores con unas 10 horas por semana cada uno, más el apoyo de la Scrum Master. La velocidad planeada es de **unos 20 puntos por sprint** y se ajustará con la velocidad real del Sprint 1.",
+          "- **Eventos de cada sprint:** Sprint Planning el lunes (1 h), Daily Scrum de lunes a viernes (15 min), y Sprint Review (45 min) y Retrospectiva (30 min) el domingo.",
+          "- **Definición de terminado (DoD):** cumple sus criterios de aceptación, el código está revisado en un *pull request*, pasa las pruebas en GitHub Actions, está desplegado y el Product Owner lo aceptó.","",
+          "## Resumen","","| Sprint | Fechas | Objetivo del sprint | Historias | Puntos |","|---|---|---|---|---|"]
+          for i,s in enumerate(S,1):
+              hs=[h for h in H if h['sprint']==i]
+              p.append(f"| {s['titulo']} | {s['inicio'][8:]}/11 – {s['fin'][8:]}/11 | {s['objetivo']} | {', '.join(h['id'] for h in hs)} | {sum(h['puntos'] for h in hs)} |")
+          p.append(f"| **Total** | | | **{len(H)}** | **{sum(h['puntos'] for h in H)}** |")
+          for i,s in enumerate(S,1):
+              hs=[h for h in H if h['sprint']==i]
+              p+=["",f"## {s['titulo']} ({s['inicio'][8:]} al {s['fin'][8:]} de noviembre)","",f"**Objetivo:** {s['objetivo']}","","| Historia | Puntos | Prioridad | Responsable |","|---|---|---|---|"]
+              p+=[f"| {h['id']} · {h['titulo']} | {h['puntos']} | {h['prioridad']} | {h['responsable']} |" for h in hs]
+              p.append(f"| **Total** | **{sum(h['puntos'] for h in hs)}** | | |")
+          p+=["","## Carga por integrante","","| Integrante | Rol | Puntos | Historias |","|---|---|---|---|"]
+          roles={'David':'Development Team (backend y datos)','Isaac':'Development Team (interfaz)','Uziel':'Development Team (registro, correo y pruebas)','Stephanie':'Scrum Master','Antonio':'Product Owner'}
+          for n in ['David','Isaac','Uziel','Stephanie']:
+              hs=[h for h in H if h['responsable']==n]
+              p.append(f"| {n} | {roles[n]} | {sum(h['puntos'] for h in hs)} | {', '.join(h['id'] for h in hs)} |")
+          p.append("| Antonio | Product Owner | — | Prioriza el backlog, redacta criterios de aceptación y acepta las historias |")
+          p+=["","## Criterios de priorización","1. **Valor y dependencia:** primero lo que habilita todo lo demás (acceso, crear eventos y registrar asistentes).","2. **Riesgo técnico al inicio:** el control de cupo y las tareas van en el Sprint 2, antes de las notificaciones, que dependen de ellos.","3. **Incremento usable en cada sprint:** al cerrar cada sprint, GCS puede usar algo nuevo de principio a fin.",""]
+          open('planeacion/06-plan-de-sprints.md','w').write("\n".join(p))
+          print("Documentos generados")
+          FIN_8
+      - name: Generar backlog y plan de sprints
+        run: python3 .github/scripts/generar_docs.py
+      - name: Guardar cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "Agrega planeación, prototipo y datos del Product Backlog" && git push)
