@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo · Gestión de Eventos GCS</title>
+<style>
+:root{--ink:#222;--mid:#666;--soft:#999;--line:#c9c9c9;--fill:#efefef;--fill2:#e2e2e2;--bg:#fafafa;--acc:#333}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:inherit}
+.banner{background:#222;color:#fff;font-size:12px;padding:6px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.banner b{letter-spacing:.04em}
+.banner select{font:inherit;padding:2px 4px}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 31px)}
+.side{background:#fff;border-right:1px solid var(--line);padding:16px 12px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:20px}
+.logo i{width:28px;height:28px;border:2px solid var(--ink);display:inline-block;border-radius:6px;position:relative}
+.logo i:after{content:"";position:absolute;inset:5px;border:1px dashed var(--ink)}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;text-decoration:none;color:var(--mid);margin-bottom:2px}
+.nav a:hover{background:var(--fill)}
+.nav a.on{background:var(--fill2);color:var(--ink);font-weight:600}
+.nav a span{width:16px;height:16px;border:1.5px solid currentColor;border-radius:3px;flex:none}
+.side .who{margin-top:24px;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--mid)}
+main{padding:20px 28px 40px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+h1{font-size:22px;margin:0}
+h2{font-size:16px;margin:0 0 10px}
+.crumb{font-size:12px;color:var(--soft);margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);background:#fff;padding:7px 14px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:2fr 1fr}
+.kpi .n{font-size:26px;font-weight:700}.kpi .l{color:var(--mid);font-size:12px}
+.bar{height:8px;background:var(--fill2);border-radius:4px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:#777}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--mid);font-weight:600;background:var(--fill)}
+td.wrap{white-space:normal}
+.tag{display:inline-block;border:1px solid var(--soft);border-radius:10px;padding:1px 8px;font-size:11px;color:var(--mid);background:#fff}
+.tag.dark{background:#555;color:#fff;border-color:#555}
+.tag.red{border-color:#b33;color:#b33}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.in{border:1.5px solid var(--line);border-radius:6px;padding:7px 10px;background:#fff;color:var(--soft);min-width:130px}
+.in.w{flex:1;min-width:200px}
+label{display:block;font-size:12px;font-weight:600;margin:0 0 4px}
+.field{margin-bottom:14px}
+.field .in{width:100%;color:var(--soft)}
+.req:after{content:" *";color:#b33}
+.radio{display:flex;gap:16px;color:var(--mid)}
+.radio span:before{content:"";display:inline-block;width:12px;height:12px;border:1.5px solid var(--mid);border-radius:50%;margin-right:6px;vertical-align:-1px}
+.radio span.on:before{background:var(--ink);box-shadow:inset 0 0 0 2px #fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tabs a{padding:8px 14px;text-decoration:none;color:var(--mid);border-bottom:2px solid transparent}
+.tabs a.on{color:var(--ink);border-color:var(--ink);font-weight:600}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.col{background:var(--fill);border-radius:8px;padding:10px;min-height:340px}
+.col h3{font-size:13px;margin:0 0 10px;display:flex;justify-content:space-between}
+.tk{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px}
+.tk b{display:block;font-size:13px;margin-bottom:6px}
+.tk .m{display:flex;justify-content:space-between;font-size:11px;color:var(--mid)}
+.av{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--fill2);border:1px solid var(--soft);font-size:10px;align-items:center;justify-content:center;font-weight:700;color:var(--ink)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);background:#fff}
+.cal div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:92px;padding:4px 6px;font-size:12px}
+.cal .h{min-height:auto;background:var(--fill);font-weight:600;color:var(--mid);text-align:center}
+.cal .o{color:#ccc}
+.ev{display:block;margin-top:4px;padding:2px 5px;border-radius:3px;font-size:11px;background:var(--fill2);border-left:3px solid #555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.t2{border-left-style:dashed}.ev.t3{border-left-color:#999}.ev.t4{border-left:3px double #555}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mid);margin-top:10px;flex-wrap:wrap}
+.note{border:1.5px dashed var(--soft);color:var(--mid);padding:10px;border-radius:6px;font-size:12px}
+.img{background:repeating-linear-gradient(45deg,var(--fill),var(--fill) 8px,#e7e7e7 8px,#e7e7e7 16px);border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:12px}
+.screen{display:none}.screen.on{display:block}
+.login{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 31px)}
+.login .card{width:360px;padding:28px}
+.public{max-width:760px;margin:24px auto;padding:0 16px}
+.hidden-shell .app{display:block}.hidden-shell .side{display:none}
+.list li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.list{list-style:none;margin:0;padding:0}.list .tag{align-self:center;white-space:nowrap}
+@media (max-width:900px){.app{grid-template-columns:1fr}.side{display:none}.g4,.g3,.g2,.kanban{grid-template-columns:1fr}main{padding:16px}}
+</style>
+</head>
+<body>
+<div class="banner"><b>PROTOTIPO · WIREFRAMES</b> Gestión de Eventos GCS — Equipo 1 · Navega con el menú o elige una pantalla:
+<select id="go" aria-label="Ir a pantalla">
+<option value="login">1. Inicio de sesión</option><option value="inicio">2. Inicio</option><option value="eventos">3. Eventos</option><option value="nuevo">4. Nuevo evento</option><option value="detalle">5. Detalle del evento</option><option value="asistentes">6. Asistentes</option><option value="tareas">7. Tareas del evento</option><option value="calendario">8. Calendario</option><option value="notificaciones">9. Notificaciones</option><option value="registro">10. Registro público</option>
+</select></div>
+
+<!-- 1. Login -->
+<section class="screen" id="s-login"><div class="login"><div class="card">
+<div class="logo"><i></i> GCS · Eventos</div>
+<h1 style="margin-bottom:6px">Iniciar sesión</h1><p style="color:var(--mid);margin-top:0">Acceso para el equipo de Global Consulting Services</p>
+<div class="field"><label>Correo</label><div class="in">nombre@gcs.com</div></div>
+<div class="field"><label>Contraseña</label><div class="in">••••••••</div></div>
+<a class="btn pri" style="width:100%;justify-content:center" href="#inicio">Entrar</a>
+<p style="font-size:12px;color:var(--soft);text-align:center">¿Olvidaste tu contraseña?</p>
+</div></div></section>
+
+<div class="app" id="shell">
+<aside class="side">
+<div class="logo"><i></i> GCS · Eventos</div>
+<nav class="nav">
+<a href="#inicio" data-s="inicio"><span></span>Inicio</a>
+<a href="#eventos" data-s="eventos detalle nuevo asistentes"><span></span>Eventos</a>
+<a href="#tareas" data-s="tareas"><span></span>Tareas</a>
+<a href="#calendario" data-s="calendario"><span></span>Calendario</a>
+<a href="#notificaciones" data-s="notificaciones"><span></span>Notificaciones</a>
+<a href="#inicio" data-s="usuarios"><span></span>Usuarios</a>
+</nav>
+<div class="who"><span class="av">AA</span> Antonio Anaya<br>Organizador · <a href="#login">Salir</a></div>
+</aside>
+<main>
+
+<!-- 2. Inicio -->
+<section class="screen" id="s-inicio">
+<div class="top"><div><div class="crumb">Inicio</div><h1>Hola, Antonio</h1></div><a class="btn pri" href="#nuevo">+ Nuevo evento</a></div>
+<div class="grid g4" style="margin-bottom:14px">
+<div class="card kpi"><div class="n">12</div><div class="l">Eventos este trimestre</div></div>
+<div class="card kpi"><div class="n">486</div><div class="l">Asistentes confirmados</div></div>
+<div class="card kpi"><div class="n">7</div><div class="l">Mis tareas pendientes</div></div>
+<div class="card kpi"><div class="n">2</div><div class="l">Tareas vencidas</div></div>
+</div>
+<div class="grid g2">
+<div class="card"><h2>Próximos eventos</h2>
+<table><tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Inscritos</th></tr>
+<tr><td><a href="#detalle">Cumbre de Transformación Digital</a></td><td><span class="tag">Conferencia</span></td><td>18 nov · Madrid</td><td>182/250</td></tr>
+<tr><td>Webinar: Riesgo regulatorio 2027</td><td><span class="tag">Webinar</span></td><td>20 nov · Virtual</td><td>310/500</td></tr>
+<tr><td>Capacitación en liderazgo ágil</td><td><span class="tag">Capacitación</span></td><td>25 nov · CDMX</td><td>28/30</td></tr>
+<tr><td>Reunión de consejo – Cliente Norte</td><td><span class="tag">Reunión ejecutiva</span></td><td>27 nov · Nueva York</td><td>12/15</td></tr>
+</table></div>
+<div class="card"><h2>Mis tareas</h2>
+<ul class="list">
+<li><span>Confirmar catering<br><small style="color:var(--soft)">Cumbre de Transformación Digital</small></span><span class="tag red">Vencida</span></li>
+<li><span>Enviar agenda a ponentes<br><small style="color:var(--soft)">Cumbre de Transformación Digital</small></span><span class="tag">Hoy</span></li>
+<li><span>Probar enlace del webinar<br><small style="color:var(--soft)">Webinar: Riesgo regulatorio</small></span><span class="tag">19 nov</span></li>
+</ul><p><a href="#tareas">Ver todas →</a></p></div>
+</div>
+</section>
+
+<!-- 3. Eventos -->
+<section class="screen" id="s-eventos">
+<div class="top"><div><div class="crumb">Eventos</div><h1>Eventos</h1></div><a class="btn pri" href="#nuevo">+ Nuevo evento</a></div>
+<div class="filters"><div class="in w">Buscar evento…</div><div class="in">Tipo ▾</div><div class="in">Región ▾</div><div class="in">Estado ▾</div><div class="in">Fechas ▾</div></div>
+<table>
+<tr><th>Evento</th><th>Tipo</th><th>Fecha</th><th>Región</th><th>Modalidad</th><th>Inscritos / cupo</th><th>Estado</th><th></th></tr>
+<tr><td><a href="#detalle">Cumbre de Transformación Digital</a></td><td>Conferencia</td><td>18–19 nov 2026</td><td>Europa</td><td>Híbrido</td><td>182 / 250</td><td><span class="tag dark">Publicado</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+<tr><td>Webinar: Riesgo regulatorio 2027</td><td>Webinar</td><td>20 nov 2026</td><td>Global</td><td>Virtual</td><td>310 / 500</td><td><span class="tag dark">Publicado</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+<tr><td>Capacitación en liderazgo ágil</td><td>Capacitación</td><td>25 nov 2026</td><td>Latinoamérica</td><td>Presencial</td><td>28 / 30</td><td><span class="tag dark">Publicado</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+<tr><td>Reunión de consejo – Cliente Norte</td><td>Reunión ejecutiva</td><td>27 nov 2026</td><td>Norteamérica</td><td>Presencial</td><td>12 / 15</td><td><span class="tag">Solo invitación</span></td><td><a class="btn sm" href="#detalle">Abrir</a></td></tr>
+<tr><td>Foro de Sostenibilidad Asia</td><td>Conferencia</td><td>3–4 dic 2026</td><td>Asia-Pacífico</td><td>Presencial</td><td>0 / 400</td><td><span class="tag">Borrador</span></td><td><a class="btn sm" href="#nuevo">Editar</a></td></tr>
+</table>
+<p style="color:var(--soft);font-size:12px">Mostrando 5 de 12 eventos · ‹ 1 2 3 ›</p>
+</section>
+
+<!-- 4. Nuevo evento -->
+<section class="screen" id="s-nuevo">
+<div class="top"><div><div class="crumb">Eventos › Nuevo</div><h1>Nuevo evento</h1></div></div>
+<div class="grid g2">
+<div class="card">
+<div class="field"><label class="req">Nombre del evento</label><div class="in">Ej. Cumbre de Transformación Digital</div></div>
+<div class="grid g3" style="gap:12px">
+<div class="field"><label class="req">Tipo</label><div class="in">Conferencia ▾</div></div>
+<div class="field"><label class="req">Cliente</label><div class="in">Seleccionar cliente ▾</div></div>
+<div class="field"><label class="req">Cupo máximo</label><div class="in">250</div></div>
+</div>
+<div class="grid g3" style="gap:12px">
+<div class="field"><label class="req">Inicio</label><div class="in">18/11/2026 09:00</div></div>
+<div class="field"><label class="req">Fin</label><div class="in">19/11/2026 18:00</div></div>
+<div class="field"><label class="req">Zona horaria</label><div class="in">Europe/Madrid ▾</div></div>
+</div>
+<div class="field"><label class="req">Modalidad</label><div class="radio"><span>Presencial</span><span>Virtual</span><span class="on">Híbrido</span></div></div>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+<div class="field"><label>Sede</label><div class="in">Hotel Meliá Castilla, Madrid ▾</div></div>
+<div class="field"><label>Enlace virtual</label><div class="in">https://…</div></div>
+</div>
+<div class="field"><label>Descripción</label><div class="in" style="height:80px">Agenda, objetivos y público del evento…</div></div>
+<div class="field"><label><input type="checkbox" disabled> Solo por invitación</label></div>
+<div style="display:flex;gap:8px;justify-content:flex-end"><a class="btn" href="#eventos">Cancelar</a><a class="btn" href="#detalle">Guardar borrador</a><a class="btn pri" href="#detalle">Publicar</a></div>
+</div>
+<div><div class="note"><b>Reglas</b><br>· La fecha de fin no puede ser anterior al inicio.<br>· Presencial o híbrido requiere sede; virtual requiere enlace.<br>· Al publicar se habilita el registro y se programa el recordatorio 24 h antes.</div></div>
+</div>
+</section>
+
+<!-- 5. Detalle -->
+<section class="screen" id="s-detalle">
+<div class="top"><div><div class="crumb">Eventos › Cumbre de Transformación Digital</div><h1>Cumbre de Transformación Digital</h1>
+<span class="tag dark">Publicado</span> <span class="tag">Conferencia</span> <span class="tag">Híbrido</span> <span style="color:var(--mid);font-size:12px">18–19 nov 2026 · Madrid (CET)</span></div>
+<div style="display:flex;gap:8px"><a class="btn" href="#nuevo">Editar</a><a class="btn" href="#notificaciones">Enviar aviso</a></div></div>
+<div class="tabs"><a class="on" href="#detalle">Resumen</a><a href="#asistentes">Asistentes</a><a href="#tareas">Tareas</a><a href="#notificaciones">Notificaciones</a></div>
+<div class="grid g3" style="margin-bottom:14px">
+<div class="card kpi"><div class="l">Cupo ocupado</div><div class="n">182 / 250</div><div class="bar"><i style="width:73%"></i></div></div>
+<div class="card kpi"><div class="l">Lista de espera</div><div class="n">0</div><div class="l">Se activa al llenarse el cupo</div></div>
+<div class="card kpi"><div class="l">Tareas hechas</div><div class="n">9 / 14</div><div class="bar"><i style="width:64%"></i></div></div>
+</div>
+<div class="grid g2">
+<div class="card"><h2>Información</h2>
+<table><tr><td>Cliente</td><td>Grupo Financiero Atlas</td></tr><tr><td>Sede</td><td>Hotel Meliá Castilla, Madrid</td></tr><tr><td>Enlace virtual</td><td>https://meet…/cumbre</td></tr><tr><td>Organizador</td><td>Antonio Anaya</td></tr><tr><td>Recordatorio</td><td>Programado: 17 nov, 09:00 CET</td></tr></table></div>
+<div class="card"><h2>Actividad reciente</h2><ul class="list">
+<li><span>María López se registró</span><small>hace 10 min</small></li>
+<li><span>Tarea "Reservar salas" → Hecha</span><small>hace 1 h</small></li>
+<li><span>Aviso de cambio de sala enviado (182)</span><small>ayer</small></li></ul></div>
+</div>
+</section>
+
+<!-- 6. Asistentes -->
+<section class="screen" id="s-asistentes">
+<div class="top"><div><div class="crumb">Eventos › Cumbre de Transformación Digital › Asistentes</div><h1>Asistentes</h1></div>
+<div style="display:flex;gap:8px"><a class="btn" href="#asistentes">Exportar CSV</a><a class="btn pri" href="#registro">+ Agregar asistente</a></div></div>
+<div class="tabs"><a href="#detalle">Resumen</a><a class="on" href="#asistentes">Asistentes</a><a href="#tareas">Tareas</a><a href="#notificaciones">Notificaciones</a></div>
+<div class="filters"><div class="in w">Buscar por nombre, correo o empresa…</div><div class="in">Estado ▾</div><div class="in">Asistencia ▾</div>
+<span class="tag dark">Confirmados 182</span><span class="tag">En espera 0</span><span class="tag">Cancelados 6</span></div>
+<table>
+<tr><th>Nombre</th><th>Empresa</th><th>Cargo</th><th>País</th><th>Registro</th><th>Estado</th><th>Check-in</th><th></th></tr>
+<tr><td>María López</td><td>Atlas</td><td>Directora de TI</td><td>España</td><td>30 oct</td><td><span class="tag dark">Confirmado</span></td><td>—</td><td><a class="btn sm" href="#asistentes">Check-in</a></td></tr>
+<tr><td>James Carter</td><td>Northwind</td><td>CFO</td><td>EE. UU.</td><td>29 oct</td><td><span class="tag dark">Confirmado</span></td><td>—</td><td><a class="btn sm" href="#asistentes">Check-in</a></td></tr>
+<tr><td>Ana Souza</td><td>Banco Sul</td><td>Gerente de riesgos</td><td>Brasil</td><td>28 oct</td><td><span class="tag dark">Confirmado</span></td><td>—</td><td><a class="btn sm" href="#asistentes">Check-in</a></td></tr>
+<tr><td>Kenji Sato</td><td>Hikari Corp</td><td>VP Operaciones</td><td>Japón</td><td>27 oct</td><td><span class="tag">Cancelado</span></td><td>—</td><td></td></tr>
+</table>
+</section>
+
+<!-- 7. Tareas -->
+<section class="screen" id="s-tareas">
+<div class="top"><div><div class="crumb">Eventos › Cumbre de Transformación Digital › Tareas</div><h1>Tareas del evento</h1></div><a class="btn pri" href="#tareas">+ Nueva tarea</a></div>
+<div class="tabs"><a href="#detalle">Resumen</a><a href="#asistentes">Asistentes</a><a class="on" href="#tareas">Tareas</a><a href="#notificaciones">Notificaciones</a></div>
+<div class="filters"><div class="in">Responsable ▾</div><div class="in">Prioridad ▾</div><div class="in">Solo mis tareas ☐</div></div>
+<div class="kanban">
+<div class="col"><h3>Pendiente <span>3</span></h3>
+<div class="tk"><b>Confirmar catering</b><div class="m"><span class="tag red">Vencida · 28 oct</span><span class="av">AA</span></div></div>
+<div class="tk"><b>Imprimir gafetes</b><div class="m"><span>15 nov · Media</span><span class="av">UG</span></div></div>
+<div class="tk"><b>Prueba de audio y video</b><div class="m"><span>17 nov · Alta</span><span class="av">CG</span></div></div></div>
+<div class="col"><h3>En curso <span>2</span></h3>
+<div class="tk"><b>Enviar agenda a ponentes</b><div class="m"><span>Hoy · Alta</span><span class="av">AA</span></div></div>
+<div class="tk"><b>Diseñar presentación de apertura</b><div class="m"><span>12 nov · Media</span><span class="av">SR</span></div></div></div>
+<div class="col"><h3>Hecha <span>9</span></h3>
+<div class="tk"><b>Reservar salas</b><div class="m"><span>Hecha 30 oct</span><span class="av">DA</span></div></div>
+<div class="tk"><b>Contratar ponente principal</b><div class="m"><span>Hecha 20 oct</span><span class="av">AA</span></div></div>
+<div class="tk" style="color:var(--soft)">+ 7 más</div></div>
+</div>
+</section>
+
+<!-- 8. Calendario -->
+<section class="screen" id="s-calendario">
+<div class="top"><div><div class="crumb">Calendario</div><h1>Noviembre 2026</h1></div>
+<div style="display:flex;gap:8px"><span class="btn sm">‹</span><span class="btn sm">Hoy</span><span class="btn sm">›</span><span class="btn sm pri">Mes</span><span class="btn sm">Semana</span></div></div>
+<div class="filters"><div class="in">Región: Todas ▾</div><div class="in">Tipo: Todos ▾</div><div class="in">Zona horaria: America/Mexico_City ▾</div></div>
+<div class="cal">
+<div class="h">Lun</div><div class="h">Mar</div><div class="h">Mié</div><div class="h">Jue</div><div class="h">Vie</div><div class="h">Sáb</div><div class="h">Dom</div>
+<div class="o">26</div><div class="o">27</div><div class="o">28</div><div class="o">29</div><div class="o">30</div><div class="o">31</div><div>1</div>
+<div>2</div><div>3</div><div>4<a class="ev t3" href="#detalle">Webinar ESG</a></div><div>5</div><div>6</div><div>7</div><div>8</div>
+<div>9</div><div>10<a class="ev t2" href="#detalle">Capacitación Excel</a></div><div>11</div><div>12</div><div>13<a class="ev t4" href="#detalle">Reunión CEO Atlas</a></div><div>14</div><div>15</div>
+<div>16</div><div>17</div><div>18<a class="ev" href="#detalle">Cumbre Transf. Digital</a></div><div>19<a class="ev" href="#detalle">Cumbre Transf. Digital</a></div><div>20<a class="ev t3" href="#detalle">Webinar Riesgo 2027</a></div><div>21</div><div>22</div>
+<div>23</div><div>24</div><div>25<a class="ev t2" href="#detalle">Liderazgo ágil</a></div><div>26</div><div>27<a class="ev t4" href="#detalle">Consejo Cliente Norte</a></div><div>28</div><div>29</div>
+</div>
+<div class="legend"><span>▌ Conferencia</span><span>┆ Capacitación</span><span style="color:var(--soft)">▌ Webinar</span><span>‖ Reunión ejecutiva</span><span>· Clic en un evento para abrir su detalle</span></div>
+</section>
+
+<!-- 9. Notificaciones -->
+<section class="screen" id="s-notificaciones">
+<div class="top"><div><div class="crumb">Notificaciones</div><h1>Notificaciones</h1></div></div>
+<div class="grid g2">
+<div class="card"><h2>Historial de envíos</h2>
+<div class="filters"><div class="in">Evento ▾</div><div class="in">Tipo ▾</div></div>
+<table><tr><th>Fecha</th><th>Evento</th><th>Tipo</th><th>Destinatarios</th><th>Estado</th></tr>
+<tr><td>29 oct 18:02</td><td>Cumbre Transf. Digital</td><td>Cambio de sala</td><td>182</td><td><span class="tag dark">Enviada</span></td></tr>
+<tr><td>17 nov 09:00</td><td>Cumbre Transf. Digital</td><td>Recordatorio 24 h</td><td>182</td><td><span class="tag">Programada</span></td></tr>
+<tr><td>28 oct 10:15</td><td>Webinar Riesgo 2027</td><td>Confirmación</td><td>1</td><td><span class="tag dark">Enviada</span></td></tr>
+<tr><td>27 oct 12:40</td><td>Liderazgo ágil</td><td>Mensaje</td><td>28</td><td><span class="tag red">2 fallidas</span></td></tr>
+</table></div>
+<div class="card"><h2>Enviar mensaje</h2>
+<div class="field"><label class="req">Evento</label><div class="in">Cumbre de Transformación Digital ▾</div></div>
+<div class="field"><label class="req">Destinatarios</label><div class="radio" style="flex-wrap:wrap"><span class="on">Confirmados</span><span>En espera</span><span>Todos</span></div></div>
+<div class="field"><label class="req">Asunto</label><div class="in">Materiales de la cumbre</div></div>
+<div class="field"><label class="req">Mensaje</label><div class="in" style="height:90px">Escribe el mensaje…</div></div>
+<div style="display:flex;gap:8px;justify-content:flex-end"><span class="btn">Vista previa</span><span class="btn pri">Enviar</span></div>
+<p class="note" style="margin-top:12px">Automáticas: confirmación de registro, aviso de cambios o cancelación y recordatorio 24 h antes.</p></div>
+</div>
+</section>
+
+</main>
+</div>
+
+<!-- 10. Registro público -->
+<section class="screen" id="s-registro"><div class="public">
+<div class="logo"><i></i> Global Consulting Services</div>
+<div class="img" style="height:140px;margin-bottom:16px">Imagen del evento</div>
+<h1>Cumbre de Transformación Digital</h1>
+<p style="color:var(--mid)">18–19 de noviembre de 2026 · Hotel Meliá Castilla, Madrid y en línea · Lugares disponibles: 68</p>
+<div class="card">
+<h2>Regístrate</h2>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+<div class="field"><label class="req">Nombre</label><div class="in">Nombre</div></div>
+<div class="field"><label class="req">Apellidos</label><div class="in">Apellidos</div></div>
+<div class="field"><label class="req">Correo</label><div class="in">correo@empresa.com</div></div>
+<div class="field"><label>Teléfono</label><div class="in">+52 …</div></div>
+<div class="field"><label class="req">Empresa</label><div class="in">Empresa</div></div>
+<div class="field"><label class="req">Cargo</label><div class="in">Cargo</div></div>
+<div class="field"><label class="req">País</label><div class="in">Seleccionar país ▾</div></div>
+<div class="field"><label>Modalidad de asistencia</label><div class="radio"><span class="on">Presencial</span><span>En línea</span></div></div>
+</div>
+<div class="field"><label><input type="checkbox" disabled> Acepto el aviso de privacidad</label></div>
+<a class="btn pri" href="#registro" onclick="document.getElementById('ok').style.display='block';return false">Confirmar registro</a>
+<div id="ok" class="note" style="display:none;margin-top:12px"><b>¡Registro confirmado!</b> Te enviamos un correo con los detalles. Si el cupo está lleno, quedarás en lista de espera y te avisaremos si se libera un lugar.</div>
+</div>
+<p style="font-size:12px"><a href="#eventos">← Volver a la vista del organizador</a></p>
+</div></section>
+
+<script>
+const sel=document.getElementById('go');
+function show(){
+  const id=(location.hash||'#inicio').slice(1);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+id));
+  const full=id==='login'||id==='registro';
+  document.getElementById('shell').style.display=full?'none':'';
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.s.split(' ').includes(id)));
+  sel.value=id; window.scrollTo(0,0);
+}
+sel.onchange=()=>{location.hash=sel.value};
+addEventListener('hashchange',show); show();
+</script>
+</body>
+</html>
